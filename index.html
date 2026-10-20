@@ -127,7 +127,7 @@
 </head>
 <body>
 
-  <!-- شاشة تسجيل الدخول بالاسم والرمز 1235 أو المشرف 2020 -->
+  <!-- شاشة تسجيل الدخول بخانة كلمة مرور نظيفة -->
   <div id="loginOverlay">
     <div class="login-card">
       <div class="ocare-logo-wrap">
@@ -150,7 +150,7 @@
         </div>
         <div class="form-group">
           <label>كلمة المرور / الرمز السري *</label>
-          <input type="password" id="loginPass" required placeholder="رمز الموظفين 1235 / المشرف 2020">
+          <input type="password" id="loginPass" required placeholder="أدخل رمز الدخول">
         </div>
         <button type="submit" class="btn-main">تسجيل الدخول</button>
       </form>
@@ -202,7 +202,6 @@
 
     <!-- 1. المخزون والأسعار -->
     <div id="view_inventory">
-      <!-- زر تنزيل الإكسل الكامل مقتصر حصرياً على المشرف -->
       <div id="adminDownloadExcelBanner" style="display:none; margin:8px 12px 2px;">
         <button onclick="downloadFullClassifiedExcel()" style="width:100%; background:#16A34A; color:#FFF; border:none; padding:10px; border-radius:12px; font-weight:800; font-size:0.82rem; cursor:pointer; box-shadow:0 4px 10px rgba(22,163,74,0.2);">
           📥 تنزيل ملف الإكسل الكامل بعد تصنيف الـ 20 قسماً (17,338 صنفاً) .xlsx
@@ -412,7 +411,6 @@
 
     <!-- 7. الإعدادات -->
     <div id="view_settings" style="display:none;">
-      <!-- الخيار ألا يظهر زر تحميل الملف الكامل إلا للمشرف -->
       <div class="section-card">
         <div class="section-title"><span>📥 استخراج ملف الإكسل المصنف بالكامل</span></div>
         <button class="btn-main" style="background:#16A34A; margin-bottom:8px;" onclick="downloadFullClassifiedExcel()">📥 تنزيل ملف الإكسل الكامل (17,338 صنفاً) .xlsx</button>
@@ -622,7 +620,7 @@
 
     function populateFiaDatalist() {
       const fiaSet = [...new Set(allProducts.map(p => p.fia))];
-      document.getElementById('fiaDatalist').innerHTML = fiaSet.map(f => `<option value="${f}">`).join('');
+      document.getElementById('fiaDatalist'].innerHTML = fiaSet.map(f => `<option value="${f}">`).join('');
     }
 
     function downloadFullClassifiedExcel() {
@@ -652,7 +650,7 @@
       } else if (pass === appConfig.empPin) {
         currentUser = { name: nameInput || 'موظف', role: 'employee' };
       } else {
-        return alert('كلمة المرور غير صحيحة! (رمز الموظفين: 1235 ، رمز المشرف: 2020)');
+        return alert('كلمة المرور غير صحيحة!');
       }
 
       localStorage.setItem('ocare_session_user', JSON.stringify(currentUser));
@@ -675,7 +673,7 @@
       document.getElementById('tabBtn_settings'].style.display = isAdm ? 'flex' : 'none';
       document.getElementById('btnClearPrintedBO'].style.display = isAdm ? 'inline-block' : 'none';
       
-      // الزر الأخضر لتحميل الملف الكامل يظهر فقط للمشرف
+      // إظهار بانر تنزيل الإكسل الكامل للمشرف فقط حصرياً
       document.getElementById('adminDownloadExcelBanner'].style.display = isAdm ? 'block' : 'none';
 
       document.querySelectorAll('.admin-export-btns').forEach(el => { el.style.display = isAdm ? 'flex' : 'none'; });
