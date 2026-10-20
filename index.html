@@ -127,7 +127,7 @@
 </head>
 <body>
 
-  <!-- شاشة تسجيل الدخول بخانة كلمة مرور نظيفة -->
+  <!-- شاشة تسجيل الدخول -->
   <div id="loginOverlay">
     <div class="login-card">
       <div class="ocare-logo-wrap">
@@ -673,7 +673,6 @@
       document.getElementById('tabBtn_settings'].style.display = isAdm ? 'flex' : 'none';
       document.getElementById('btnClearPrintedBO'].style.display = isAdm ? 'inline-block' : 'none';
       
-      // إظهار بانر تنزيل الإكسل الكامل للمشرف فقط حصرياً
       document.getElementById('adminDownloadExcelBanner'].style.display = isAdm ? 'block' : 'none';
 
       document.querySelectorAll('.admin-export-btns').forEach(el => { el.style.display = isAdm ? 'flex' : 'none'; });
