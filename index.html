@@ -62,16 +62,6 @@
     .search-bar .s-icon { position: absolute; right: 13px; font-size: 1rem; pointer-events: none; }
     .search-bar .c-btn { position: absolute; left: 8px; border: none; background: var(--primary-light); color: var(--primary-dark); border-radius: 12px; width: 34px; height: 34px; cursor: pointer; font-size: 1.1rem; }
 
-    /* شريط الأقسام الأفقي (صف واحد قابل للتمرير) */
-    .cats-strip-wrap { padding: 10px 12px 4px; }
-    .cats-strip-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
-    .cats-strip-header span { font-size: 0.82rem; font-weight: 800; color: var(--navy); }
-    .cats-strip-header a { font-size: 0.75rem; color: var(--primary); font-weight: 700; cursor: pointer; }
-    .cats-horizontal { display: flex; gap: 7px; overflow-x: auto; padding-bottom: 6px; scrollbar-width: none; white-space: nowrap; }
-    .cats-horizontal::-webkit-scrollbar { display: none; }
-    .cat-pill { flex: 0 0 auto; display: inline-flex; align-items: center; gap: 5px; padding: 8px 13px; border-radius: 20px; border: 1.5px solid var(--border); background: #FFF; color: var(--text); font-size: 0.76rem; font-weight: 700; cursor: pointer; }
-    .cat-pill.active { background: var(--navy); color: #FFF; border-color: var(--navy); box-shadow: 0 4px 10px rgba(11,25,87,0.2); }
-
     /* مربع الأسعار */
     .price-calc-box { margin: 8px 12px; background: linear-gradient(135deg, #FFFBEB 0%, #FEF3C7 100%); border: 1.5px solid #F59E0B; border-radius: 16px; padding: 11px 13px; }
     .price-calc-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
@@ -96,7 +86,6 @@
     .prod-meta { font-size: 0.72rem; color: var(--muted); margin-bottom: 5px; }
     .prod-tags { display: flex; flex-wrap: wrap; gap: 4px; }
     .tag { font-size: 0.67rem; padding: 2px 7px; border-radius: 6px; font-weight: 700; }
-    .tag-cat { background: #ECFDF5; color: #059669; }
     .tag-fia { background: #F3E8FF; color: #7E22CE; }
     .tag-price { background: #FEF3C7; color: #B45309; }
     .tag-batch { background: #EFF6FF; color: #1D4ED8; }
@@ -151,12 +140,12 @@
         <span class="ocare-text-en">CARE</span>
       </div>
       <h2>تسجيل الدخول</h2>
-      <p>أدخل البريد الإلكتروني المعتمد ورمز المرور</p>
+      <p>أدخل البريد الإلكتروني (أو الاسم) ورمز المرور</p>
 
       <form onsubmit="handleLogin(event)">
         <div class="form-group">
-          <label>البريد الإلكتروني *</label>
-          <input type="email" id="loginEmail" required placeholder="example@gmail.com">
+          <label>البريد الإلكتروني أو الاسم *</label>
+          <input type="text" id="loginEmail" required placeholder="example@gmail.com أو اسمك">
         </div>
         <div class="form-group">
           <label>كلمة المرور / الرمز السري *</label>
@@ -188,7 +177,7 @@
           <button class="icon-badge-btn" onclick="switchTab('notes')" title="ملاحظات الشفت والتنبيهات">
             🔔<span class="notif-dot" id="notifBadge">0</span>
           </button>
-          <span class="role-pill" id="roleBadge">مشرف</span>
+          <span class="role-pill" id="roleBadge">مطور</span>
           <button class="btn-exit" onclick="handleLogout()">خروج</button>
         </div>
       </div>
@@ -211,20 +200,12 @@
       <button class="mod-btn" id="tabBtn_settings" style="display:none;" onclick="switchTab('settings')">⚙️ الإعدادات</button>
     </div>
 
-    <!-- 1. قسم المخزون العام + شريط الأقسام الأفقي + حاسبة الأسعار -->
+    <!-- 1. قسم المخزون العام + حاسبة الأسعار (بدون شريط الأقسام) -->
     <div id="view_inventory">
       <div id="adminDownloadExcelBanner" style="display:none; margin:8px 12px 2px;">
         <button onclick="downloadFullClassifiedExcel()" style="width:100%; background:#16A34A; color:#FFF; border:none; padding:10px; border-radius:12px; font-weight:800; font-size:0.82rem; cursor:pointer; box-shadow:0 4px 10px rgba(22,163,74,0.2);">
-          📥 تنزيل ملف الإكسل الكامل بعد تصنيف الـ 20 قسماً (17,338 صنفاً) .xlsx
+          📥 تنزيل ملف الإكسل الكامل (17,338 صنفاً) .xlsx
         </button>
-      </div>
-
-      <div class="cats-strip-wrap">
-        <div class="cats-strip-header">
-          <span>الأقسام المعتمدة (اسحب لليمين واليسار ↔️)</span>
-          <a onclick="selectCategory('الكل')">عرض الكل (<span id="totalLoadedCount">0</span>)</a>
-        </div>
-        <div class="cats-horizontal" id="categoriesStrip"></div>
       </div>
 
       <!-- مربع عرض ومجموع الأسعار -->
@@ -242,7 +223,7 @@
 
       <div class="section-card" style="padding:10px 14px; margin-bottom:4px;">
         <div style="display:flex; justify-content:space-between; align-items:center;">
-          <strong style="font-size:0.84rem;" id="activeCatTitle">جميع الأصناف</strong>
+          <strong style="font-size:0.84rem;">جميع الأصناف في المخزون (<span id="totalLoadedCount">0</span>)</strong>
           <span style="font-size:0.75rem; color:var(--muted);" id="filteredCountLbl">جاري التحميل التلقائي...</span>
         </div>
       </div>
@@ -335,7 +316,7 @@
           <label>توجيه الملاحظة والتنبيه إلى:</label>
           <select id="noteTargetSelect">
             <option value="الجميع">🔔 جميع الموظفين والشفت القادم</option>
-            <option value="المشرف">🔒 المشرف فقط</option>
+            <option value="المطور">🔒 المطور فقط</option>
           </select>
         </div>
         <div class="form-group">
@@ -416,38 +397,40 @@
         </div>
 
         <div id="empReportRestrictionNotice" style="display:none; background:#FEF2F2; color:#991B1B; padding:10px; border-radius:10px; font-size:0.76rem; font-weight:700; text-align:center; margin-top:8px;">
-          🔒 تنزيل ملفات Excel و PDF مخصص لحساب المشرف فقط. يمكنك استخدام زر "👁️ معاينة" لعرض البيانات.
+          🔒 تنزيل ملفات Excel و PDF مخصص لحساب المطور فقط. يمكنك استخدام زر "👁️ معاينة" لعرض البيانات.
         </div>
       </div>
     </div>
 
-    <!-- 7. لوحة إعدادات المالك -->
+    <!-- 7. لوحة إعدادات المطور -->
     <div id="view_settings" style="display:none;">
       <div class="section-card">
-        <div class="section-title"><span>📥 استخراج ملف الإكسل المصنف بالكامل</span></div>
+        <div class="section-title"><span>📥 استخراج ملف الإكسل الكامل</span></div>
         <button class="btn-main" style="background:#16A34A; margin-bottom:8px;" onclick="downloadFullClassifiedExcel()">📥 تنزيل ملف الإكسل الكامل (17,338 صنفاً) .xlsx</button>
         <button class="btn-main" style="background:#2563EB;" onclick="downloadThreePartsExcel()">📥 تنزيل ملف الإكسل مقسماً إلى 3 أجزاء .xlsx</button>
       </div>
 
       <div class="section-card">
-        <div class="section-title"><span>👥 إدارة حسابات الموظفين المسموح لهم بالدخول</span></div>
+        <div class="section-title"><span>👥 إدارة حسابات الزملاء ومزامنة جوالاتهم</span></div>
+        <p style="font-size:0.74rem; color:var(--muted); margin-bottom:8px;">أضف إيميل واسم الزميل، ثم اضغط زر "نسخ رابط المزامنة" وأرسله بالواتساب ليتفعل اسمه في جواله فوراً (كما يمكن لأي زميل الدخول مباشرة برمز 1235):</p>
         <div style="display:grid; grid-template-columns: 1.3fr 1fr auto; gap:6px; margin-bottom:10px;">
-          <input type="email" id="newEmpEmail" placeholder="إيميل الموظف" style="padding:8px; border-radius:8px; border:1px solid var(--border); font-size:0.8rem;">
+          <input type="text" id="newEmpEmail" placeholder="إيميل أو معرف الزميل" style="padding:8px; border-radius:8px; border:1px solid var(--border); font-size:0.8rem;">
           <input type="text" id="newEmpName" placeholder="الاسم (مثل: د. أحمد)" style="padding:8px; border-radius:8px; border:1px solid var(--border); font-size:0.8rem;">
           <button class="mini-act-btn" style="background:var(--navy); color:#fff;" onclick="addAuthorizedEmployee()">➕ إضافة</button>
         </div>
         <div id="authorizedEmployeesList"></div>
+        <button class="btn-main" style="background:#0D9488; margin-top:10px;" onclick="copyEmployeeSyncLink()">📲 نسخ رابط مزامنة الحسابات لجوالات الزملاء</button>
       </div>
 
       <div class="section-card">
-        <div class="section-title"><span>🔐 إعدادات الرموز السرية وبريد المشرف</span></div>
+        <div class="section-title"><span>🔐 إعدادات الرموز السرية وبريد المطور</span></div>
         <div class="form-group">
-          <label>بريد المشرف المعتمد:</label>
+          <label>بريد المطور المعتمد:</label>
           <input type="email" id="setAdminEmail">
         </div>
         <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
           <div class="form-group">
-            <label>الرمز السري للمشرف (2020):</label>
+            <label>الرمز السري للمطور (2020):</label>
             <input type="text" id="setAdminPin">
           </div>
           <div class="form-group">
@@ -497,30 +480,6 @@
   <div class="toast" id="toastBox"></div>
 
   <script>
-    const OFFICIAL_CATEGORIES = [
-      { name: 'الكل', icon: '🌐' },
-      { name: 'الأدوية', icon: '💊' },
-      { name: 'الفيتامينات والمكملات', icon: '⚡' },
-      { name: 'حليب وغذاء الأطفال', icon: '🍼' },
-      { name: 'العناية بالطفل', icon: '👶' },
-      { name: 'العناية بالبشرة', icon: '✨' },
-      { name: 'العناية بالشعر', icon: '💇' },
-      { name: 'صبغات الشعر', icon: '🎨' },
-      { name: 'المكياج والتجميل', icon: '💄' },
-      { name: 'عدسات ومحاليلها', icon: '👁️' },
-      { name: 'العناية بالفم والأسنان', icon: '🪥' },
-      { name: 'العناية بالجسم والاستحمام', icon: '🧼' },
-      { name: 'العناية باليدين والقدمين', icon: '🧴' },
-      { name: 'مزيلات العرق', icon: '❄️' },
-      { name: 'المعطرات والعطور', icon: '🌸' },
-      { name: 'العناية بالرجال والحلاقة', icon: '🧔' },
-      { name: 'العناية النسائية', icon: '🌷' },
-      { name: 'حفاضات وكبار السن', icon: '🛏️' },
-      { name: 'الأجهزة والمستلزمات الطبية', icon: '🩺' },
-      { name: 'الإكسسوارات وأدوات التجميل', icon: '✂️' },
-      { name: 'الأعشاب والعسل والزيوت', icon: '🍯' }
-    ];
-
     let appConfig = JSON.parse(localStorage.getItem('ocare_app_config') || 'null') || {
       adminEmails: ['ershadn2030@gmail.com', 'ershad@gmail.com', 'admin@ocare.com'],
       adminPin: '2020',
@@ -533,7 +492,6 @@
 
     let currentUser = null;
     let allProducts = [];
-    let selectedCategory = 'الكل';
     let priceCart = [];
     let barcodeOrders = JSON.parse(localStorage.getItem('ocare_barcode_orders') || '[]');
     let shortagesList = JSON.parse(localStorage.getItem('ocare_shortages_list') || '[]');
@@ -550,64 +508,36 @@
       setTimeout(() => t.classList.remove('show'), 2600);
     }
 
-    // الخوارزمية الذكية لتصنيف الصنف بناءً على قراءة اسم الصنف أولاً
-    function smartClassifyItem(nameRaw, fiaRaw, currRaw) {
-      const name = String(nameRaw || '').trim();
-      const nameLow = name.toLowerCase();
-      const fia = String(fiaRaw || '').trim().toLowerCase();
-      const curr = String(currRaw || '').trim();
-      const hasAny = (str, arr) => arr.some(w => str.includes(w));
-
-      if (hasAny(nameLow, ['عسل ', 'عسل نحل', 'روضة النحل', 'سدر ', 'غذاء ملكات', 'لبان ', 'حبوب اللقاح', 'مشروب مورينجا', 'مشروب النعناع', 'مشروب الكركم', 'مشروب الكراوية', 'مشروب الزعتر', 'شاي اخضر', 'يانسون', 'بابونج']))
-        return 'الأعشاب والعسل والزيوت';
-      if (hasAny(nameLow, ['عدسات', 'عدسة', 'محلول عدسات']) || curr === 'عدسات')
-        return 'عدسات ومحاليلها';
-      if (hasAny(nameLow, ['صبغة', 'صبغه', 'صبغات', 'شامبو صبغة', 'بيجن', 'كولستون', 'غارنييه كولر', 'ويلا كولستون', 'بلياج', 'اكسجين صبغة', 'أكسجين']) || curr === 'صبغات الشعر')
-        return 'صبغات الشعر';
-      if (hasAny(nameLow, ['حليب اطفال', 'حليب أطفال', 'حليب للرضع', 'سيريلاك', 'غذاء تكميلي', 'بسكويت اطفال', 'ابتاميل', 'سيميلاك', 'بيبلاك', 'نان ', 'نيدو ', 'رونالاك', 'فبي ميلك', 'بروميل', 'اس-26', 'انفاميل', 'بدياشور', 'نوفالاك', 'بليمل بلس']) || curr === 'حليب الأطفال') {
-        if (!hasAny(nameLow, ['كريم', 'لوشن', 'غسول', 'شامبو', 'صابون', 'مزيل', 'ماسك', 'مقشر']))
-          return 'حليب وغذاء الأطفال';
-      }
-      if (hasAny(nameLow, ['كبار السن', 'حفائظ كبار', 'حفاضات كبار', 'لايفري', 'تينا ', 'مفارش سرير', 'حفائظ بالغين', 'فاين كير']) || curr === 'حفاضات البالغين')
-        return 'حفاضات وكبار السن';
-      if (hasAny(nameLow, ['بيبي جوي', 'بامبرز', 'هجيز', 'بيبي لايف', 'فاين بيبي', 'مولفيكس', 'رضاعة', 'رضاعه', 'لهاية', 'لهايه', 'حلمة رضاعة', 'شامبو اطفال', 'شامبو أطفال', 'شامبو ناعم للاطفال', 'زيت اطفال', 'زيت أطفال', 'بودرة اطفال', 'مناديل اطفال', 'مناديل مبللة للاطفال', 'عضاضة', 'شفاط حليب', 'حفائظ اطفال', 'حفاضات اطفال']) || curr === 'العناية بالطفل')
-        return 'العناية بالطفل';
-      if (hasAny(nameLow, ['اسنان', 'أسنان', 'معجون', 'فرشاة اسنان', 'فرشه اسنان', 'فرش اسنان', 'مضمضة', 'مضمضه', 'غسول فم', 'غسول للفم', 'خيط اسنان', 'اعواد اسنان', 'سنسوداين', 'كولجيت', 'سيجنال', 'اورال بي', 'أورال بي', 'ليسترين', 'بارودونتكس', 'تراي دنت', 'مسواك', 'لثة', 'اللثة']) || curr === 'العناية بالفم واللثة')
-        return 'العناية بالفم والأسنان';
-      if (hasAny(nameLow, ['مزيل عرق', 'مزيل للعرق', 'مضاد للتعرق', 'مقاوم للتعرق', 'ديودرنت', 'رول اون', 'رول أون', 'ستيك عرق']) || curr === 'مزيلات العرق')
-        return 'مزيلات العرق';
-      if (hasAny(nameLow, ['فوط صحية', 'فوط نسائية', 'فوط يومية', 'اولويز', 'أولويز', 'سوفي ', 'كوتكس', 'فام ', 'برايفت', 'غسول نسائي', 'مناديل نسائية', 'دش مهبلي', 'كيرفري']) || ['فوط صحية', 'غسولات نسائية'].includes(curr))
-        return 'العناية النسائية';
-      if (hasAny(nameLow, ['حلاقة', 'حلاقه', 'ماكينة حلاقة', 'شفرات', 'امواس', 'أمواس', 'جيليت', 'بلسم بعد الحلاقة', 'فوم حلاقة', 'جل حلاقة للرجال', 'للرجال', 'رجالي', 'لحية', 'اللحية']) || ['العناية بالرجل', 'العناية بالراجل', 'امواس'].includes(curr)) {
-        if (!hasAny(nameLow, ['نسائي', 'للنساء', 'فينوس']))
-          return 'العناية بالرجال والحلاقة';
-      }
-      if (hasAny(nameLow, ['جهاز ضغط', 'قياس ضغط', 'جهاز سكر', 'قياس السكر', 'شرائط اختبار', 'شرائط سكر', 'نيبولايزر', 'نيبيولايزر', 'جهاز بخار', 'ترمومتر', 'ميزان حرارة', 'كمامة', 'كمامات', 'قفازات', 'شاش ', 'لاصق جروح', 'رباط ضاغط', 'عكاز', 'كيس بول', 'سرنجة', 'ابرة سكر', 'إبر وخز', 'مشد ', 'جبيرة', 'كمادة', 'قربة ماء']) || ['اجهزه طبيه', 'معدات طبية'].includes(curr))
-        return 'الأجهزة والمستلزمات الطبية';
-      if (hasAny(nameLow, ['فيتامين', 'مكمل غذائي', 'أوميجا', 'اوميجا', 'كولاجين شراب', 'رويال جيلي', 'جينسنج', 'كالسيوم', 'ماغنيسيوم', 'حديد ', 'فوليك اسيد', 'بايوتين']))
-        return 'الفيتامينات والمكملات';
-      if (['أدوية', 'الادوية'].includes(curr) || fia.includes('medicine') || fia.includes('ادويه') || hasAny(nameLow, ['أقراص', 'اقراص', 'قرص ', 'قرصًا', 'كبسول', 'كبسولات', 'شراب ', 'معلق ', 'فيال', 'امبول', 'أمبول', 'قطرة عين', 'قطرة انف', 'قطرة أذن', 'تحاميل', 'لبوس', 'مرهم طبي', 'مضاد حيوي', 'ملغ', 'مجم'])) {
-        if (!hasAny(nameLow, ['شامبو', 'صبغة', 'مكياج', 'مسكرا', 'أحمر شفاه', 'مقشر', 'ماسك', 'بودرة']))
-          return 'الأدوية';
-      }
-      if (curr === 'المكياج' || hasAny(nameLow, ['مكياج', 'ماسكرا', 'مسكرا', 'مسكارا', 'أحمر شفاه', 'احمر شفاه', 'روج ', 'ملمع شفاه', 'محدد شفاه', 'محدد شفايف', 'احمر خدود', 'بلاشر', 'فاونديشن', 'كريم اساس', 'كريم أساس', 'كونسيلر', 'كنتور', 'ايلاينر', 'آيلاينر', 'كحل ', 'حواجب', 'ظلال عيون', 'ايشادو', 'رموش', 'طلاء اظافر', 'مناكير', 'مزيل مناكير', 'مزيل مكياج', 'فلورمار', 'هدى بيوتي', 'هدي بيوتي', 'نيكس', 'ميبيلين', 'لوريال انفلبل', 'برجوا', 'ريميل']))
-        return 'المكياج والتجميل';
-      if (['معطرات الجسم', 'معطرات  الجو'].includes(curr) || hasAny(nameLow, ['معطر جسم', 'معطر للجسم', 'معطر جو', 'معطر للجو', 'عطر ', 'او دي بارفان', 'أو دي تواليت', 'بادي ميست', 'سبلاش للجسم', 'مسك ', 'بخور', 'فيبريز']))
-        return 'المعطرات والعطور';
-      if (['الاكسسوارات', 'الأجهزة'].includes(curr) || hasAny(nameLow, ['مقص اظافر', 'مبرد اظافر', 'ملقط', 'فرشاة شعر', 'فرشة شعر', 'مشط ', 'ملفف الشعر', 'استشوار', 'اسشوار', 'مكواة شعر', 'سيراميك شعر', 'اسفنجة مكياج', 'فرش مكياج', 'ربطة شعر', 'بنس شعر', 'توكة', 'مرايا', 'شنطة مكياج', 'قبعة استحمام']))
-        return 'الإكسسوارات وأدوات التجميل';
-      if (curr === 'غسولات اليدين' || hasAny(nameLow, ['غسول اليدين', 'غسول لليدين', 'لليدين', 'كريم يدين', 'معقم يدين', 'جل معقم', 'للقدمين', 'تشققات القدم', 'مبرد قدم', 'املاح القدم', 'كعب القدم']))
-        return 'العناية باليدين والقدمين';
-      if (['العناية بالجسم', 'مزيل الشعر'].includes(curr) || hasAny(nameLow, ['غسول جسم', 'غسول للجسم', 'شاور جل', 'جل استحمام', 'جل الاستحمام', 'صابون مغربي', 'صابون سائل', 'صابون ', 'صابونة', 'ليفة', 'ليفه', 'مقشر جسم', 'مقشر للجسم', 'لوشن جسم', 'لوشن للجسم', 'زبدة الجسم', 'ازالة الشعر', 'إزالة الشعر', 'شرائح شمعية', 'شمع ', 'فيت ', 'نير ', 'بودرة جسم', 'مناشف']))
-        return 'العناية بالجسم والاستحمام';
-      if (curr === 'العناية بالشعر' || hasAny(nameLow, ['شامبو', 'بلسم', 'حمام زيت', 'بديل الزيت', 'سيروم شعر', 'سيروم للشعر', 'زيت شعر', 'زيت للشعر', 'كريم شعر', 'كريم للشعر', 'ماسك شعر', 'ماسك للشعر', 'جل شعر', 'جل للشعر', 'بخاخ شعر', 'سبراي شعر', 'لتساقط الشعر', 'القشرة', 'قشرة الشعر', 'كانتو', 'فاتيكا', 'بانتين', 'هيربل اسنسز', 'صنسيلك', 'غارنييه الترا دو', 'إلفيف', 'الفيف']))
-        return 'العناية بالشعر';
-      if (['الأعشاب', 'زيوت عضوية'].includes(curr) || hasAny(nameLow, ['زيت اللوز', 'زيت الخروع', 'زيت الجوجوبا', 'زيت الارغان', 'زيت الأرغان', 'زيت جوز الهند', 'زيت السمسم', 'زيت الحبة السوداء', 'زيت اللافندر', 'زيت النعناع', 'زيت اكليل الجبل', 'زيت الورد', 'زيت الثوم', 'زيت الحلبة', 'زيت الزيتون', 'وادي النحل زيت']))
-        return 'الأعشاب والعسل والزيوت';
-      return 'العناية بالبشرة';
+    // مزامنة إعدادات وحسابات الموظفين عبر الرابط الذكي فور فتحه على جوال أي موظف
+    function checkUrlSyncConfig() {
+      try {
+        const params = new URLSearchParams(window.location.search);
+        const syncData = params.get('sync');
+        if (syncData) {
+          const decoded = JSON.parse(decodeURIComponent(escape(atob(syncData))));
+          if (decoded && decoded.employees) {
+            appConfig = decoded;
+            localStorage.setItem('ocare_app_config', JSON.stringify(appConfig));
+            window.history.replaceState({}, document.title, window.location.pathname);
+            setTimeout(() => showToast('✅ تمت مزامنة حسابات الزملاء على هذا الجوال بنجاح!'), 500);
+          }
+        }
+      } catch (e) {}
     }
 
-    // قراءة وتصنيف ملف الإكسل تلقائياً فور فتح التطبيق بدون أي تدخل يدوي
+    function copyEmployeeSyncLink() {
+      try {
+        const encoded = btoa(unescape(encodeURIComponent(JSON.stringify(appConfig))));
+        const syncUrl = window.location.origin + window.location.pathname + '?sync=' + encoded;
+        navigator.clipboard.writeText(syncUrl).then(() => {
+          alert('تم نسخ رابط المزامنة بنجاح! أرسله الآن لزملائك في الواتساب؛ بمجرد فتحهم للرابط ستتحدث قائمة الحسابات وأسمائهم في جوالاتهم تلقائياً.');
+        }).catch(() => {
+          prompt('انسخ هذا الرابط وأرسله للزملاء:', syncUrl);
+        });
+      } catch (e) {}
+    }
+
+    // قراءة ملف الإكسل أو CSV تلقائياً فور فتح التطبيق بدون أقسام
     async function autoLoadInventoryFromServer() {
       const savedBatches = JSON.parse(localStorage.getItem('ocare_saved_batches') || '{}');
       const excelFilesToTry = ['تحديد السعر والقسم.xlsx', 'pharmacy_data.xlsx', 'inventory.xlsx'];
@@ -626,10 +556,8 @@
               const barcode = String(r['الباركود '] || r['الباركود'] || '').replace(/\.0$/, '').trim();
               const name = String(r['اسم الصنف '] || r['اسم الصنف'] || '').trim();
               const fia = String(r['الفئة'] || 'مورد عام').trim();
-              const rawCat = String(r['القسم '] || r['القسم'] || '').trim();
               const price = parseFloat(r['سعر البيع']) || 0;
               if (name) {
-                const cat = smartClassifyItem(name, fia, rawCat);
                 const key = barcode || itemNum || ('id_' + idx);
                 items.push({
                   uid: 'p_' + idx,
@@ -637,7 +565,6 @@
                   barcode: barcode,
                   name: name,
                   fia: fia,
-                  category: cat,
                   price: Number(price.toFixed(2)),
                   batches: savedBatches[key] || []
                 });
@@ -647,7 +574,7 @@
               allProducts = items;
               populateFiaDatalist();
               renderInventory();
-              showToast(`تم التحميل والتصنيف التلقائي لـ ${allProducts.length.toLocaleString()} صنف!`);
+              showToast(`تم التحميل التلقائي لـ ${allProducts.length.toLocaleString()} صنف!`);
               return;
             }
           }
@@ -666,7 +593,6 @@
             const barcode = String(r['الباركود'] || r['الباركود '] || '').replace(/\.0$/, '').trim();
             const name = String(r['اسم الصنف'] || r['اسم الصنف '] || '').trim();
             const fia = String(r['الفئة'] || 'مورد عام').trim();
-            const rawCat = String(r['القسم'] || r['القسم '] || '').trim();
             const price = parseFloat(r['سعر البيع']) || 0;
             const key = barcode || itemNum || ('id_' + idx);
             return {
@@ -675,7 +601,6 @@
               barcode: barcode,
               name: name,
               fia: fia,
-              category: smartClassifyItem(name, fia, rawCat),
               price: Number(price.toFixed(2)),
               batches: savedBatches[key] || []
             };
@@ -691,7 +616,7 @@
       document.getElementById('fiaDatalist').innerHTML = fiaSet.map(f => `<option value="${f}">`).join('');
     }
 
-    // تنزيل ملف الإكسل الكامل بعد التصنيف بضغطة زر واحدة
+    // تنزيل ملف الإكسل الكامل
     function downloadFullClassifiedExcel() {
       if (!allProducts.length) return alert('تأكد من وجود ملف تحديد السعر والقسم.xlsx بجانب ملف الكود');
       const exportRows = allProducts.map(p => ({
@@ -699,13 +624,12 @@
         'الباركود': p.barcode,
         'اسم الصنف': p.name,
         'الفئة': p.fia,
-        'القسم': p.category,
         'سعر البيع': p.price
       }));
       const ws = XLSX.utils.json_to_sheet(exportRows);
       const wb = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(wb, ws, 'المخزون_المصنف_17338');
-      XLSX.writeFile(wb, 'تحديد_السعر_والقسم_مكتمل_17338.xlsx');
+      XLSX.utils.book_append_sheet(wb, ws, 'المخزون_17338');
+      XLSX.writeFile(wb, 'تحديد_السعر_مكتمل_17338.xlsx');
       showToast('جاري تنزيل ملف الإكسل الكامل (17,338 صنفاً)...');
     }
 
@@ -716,13 +640,12 @@
         'الباركود': p.barcode,
         'اسم الصنف': p.name,
         'الفئة': p.fia,
-        'القسم': p.category,
         'سعر البيع': p.price
       }));
       const parts = [
-        { d: exportRows.slice(0, 6000), n: 'تحديد_السعر_والقسم_الجزء_1.xlsx' },
-        { d: exportRows.slice(6000, 12000), n: 'تحديد_السعر_والقسم_الجزء_2.xlsx' },
-        { d: exportRows.slice(12000), n: 'تحديد_السعر_والقسم_الجزء_3.xlsx' }
+        { d: exportRows.slice(0, 6000), n: 'مخزون_أوكير_الجزء_1.xlsx' },
+        { d: exportRows.slice(6000, 12000), n: 'مخزون_أوكير_الجزء_2.xlsx' },
+        { d: exportRows.slice(12000), n: 'مخزون_أوكير_الجزء_3.xlsx' }
       ];
       parts.forEach(pt => {
         const ws = XLSX.utils.json_to_sheet(pt.d);
@@ -732,24 +655,30 @@
       });
     }
 
+    // تسجيل الدخول المرن (يدعم المطور 2020 + حسابات الموظفين من أي جوال 1235)
     function handleLogin(e) {
       e.preventDefault();
-      const email = document.getElementById('loginEmail').value.trim().toLowerCase();
+      const emailInput = document.getElementById('loginEmail').value.trim();
+      const emailLow = emailInput.toLowerCase();
       const pass = document.getElementById('loginPass').value.trim();
-      const isAdmin = appConfig.adminEmails.some(a => a.toLowerCase() === email);
+      const isAdminEmail = appConfig.adminEmails.some(a => a.toLowerCase() === emailLow);
 
-      if (isAdmin && pass === appConfig.adminPin) {
-        currentUser = { email, name: 'إرشاد (المشرف العام)', role: 'admin' };
+      if (pass === appConfig.adminPin && (isAdminEmail || emailLow.includes('ershad') || emailLow.includes('admin') || emailInput.includes('إرشاد') || emailInput.includes('ارشاد'))) {
+        currentUser = { email: emailLow, name: 'إرشاد (المطور)', role: 'admin' };
+      } else if (pass === appConfig.adminPin && isAdminEmail) {
+        currentUser = { email: emailLow, name: 'إرشاد (المطور)', role: 'admin' };
+      } else if (pass === appConfig.empPin) {
+        const emp = appConfig.employees.find(u => u.email.toLowerCase() === emailLow && u.active !== false);
+        const displayName = emp ? emp.name : (emailInput.includes('@') ? emailInput.split('@')[0] : emailInput);
+        currentUser = { email: emailLow, name: displayName, role: 'employee' };
       } else {
-        const emp = appConfig.employees.find(u => u.email.toLowerCase() === email && u.active !== false);
-        if (!emp) return alert('هذا الحساب غير مضاف في قائمة الموظفين المعتمدين لدى المشرف.');
-        if (pass !== appConfig.empPin) return alert('كلمة المرور غير صحيحة!');
-        currentUser = { email, name: emp.name || email.split('@')[0], role: 'employee' };
+        return alert('كلمة المرور أو بيانات الدخول غير صحيحة!');
       }
 
       localStorage.setItem('ocare_session_user', JSON.stringify(currentUser));
       document.getElementById('loginOverlay').style.display = 'none';
       applyPermissionsUI();
+      showToast(`مرحباً بك، ${currentUser.name} 👋`);
     }
 
     function handleLogout() {
@@ -762,7 +691,7 @@
       if (!currentUser) return;
       document.getElementById('userGreeting').innerText = `مرحباً، ${currentUser.name} 👋`;
       const isAdm = currentUser.role === 'admin';
-      document.getElementById('roleBadge').innerText = isAdm ? '🟢 مشرف' : '👤 موظف';
+      document.getElementById('roleBadge').innerText = isAdm ? '🟢 مطور' : '👤 موظف';
       document.getElementById('tabBtn_settings').style.display = isAdm ? 'flex' : 'none';
       document.getElementById('btnClearPrintedBO').style.display = isAdm ? 'inline-block' : 'none';
       document.getElementById('adminDownloadExcelBanner').style.display = isAdm ? 'block' : 'none';
@@ -775,28 +704,11 @@
       renderSettingsUI();
     }
 
-    function renderCategoriesStrip() {
-      const box = document.getElementById('categoriesStrip');
-      box.innerHTML = OFFICIAL_CATEGORIES.map(c => `
-        <button class="cat-pill ${selectedCategory === c.name ? 'active' : ''}" onclick="selectCategory('${c.name}')">
-          <span>${c.icon}</span><span>${c.name}</span>
-        </button>
-      `).join('');
-    }
-
-    function selectCategory(catName) {
-      selectedCategory = catName;
-      document.getElementById('activeCatTitle').innerText = catName === 'الكل' ? 'جميع الأصناف' : `قسم: ${catName}`;
-      renderCategoriesStrip();
-      renderInventory();
-    }
-
     function renderInventory() {
       const q = document.getElementById('mainSearch').value.trim().toLowerCase();
       document.getElementById('totalLoadedCount').innerText = allProducts.length.toLocaleString();
 
       const filtered = allProducts.filter(p => {
-        if (selectedCategory !== 'الكل' && p.category !== selectedCategory) return false;
         if (!q) return true;
         return p.name.toLowerCase().includes(q) || p.barcode.toLowerCase().includes(q) || p.item_number.toLowerCase().includes(q);
       });
@@ -819,7 +731,6 @@
               <div class="prod-name">${p.name}</div>
               <div class="prod-meta">رقم الصنف: <strong>${p.item_number || '-'}</strong> | الباركود: <strong>${p.barcode || '-'}</strong></div>
               <div class="prod-tags">
-                <span class="tag tag-cat">${p.category}</span>
                 <span class="tag tag-fia">${p.fia}</span>
                 <span class="tag tag-price">${p.price.toFixed(2)} ريال</span>
                 ${bHtml}
@@ -1056,7 +967,7 @@
     function renderShiftNotes() {
       const box = document.getElementById('shiftNotesContainer');
       const isAdm = currentUser && currentUser.role === 'admin';
-      const visible = shiftNotes.filter(n => n.target !== 'المشرف' || isAdm);
+      const visible = shiftNotes.filter(n => (n.target !== 'المطور' && n.target !== 'المشرف') || isAdm);
       if (!visible.length) { box.innerHTML = `<div style="text-align:center; padding:18px; color:var(--muted);">لا توجد ملاحظات.</div>`; return; }
       box.innerHTML = visible.map(n => `
         <div class="prod-card" style="margin-bottom:8px; flex-direction:column; align-items:stretch;">
@@ -1076,7 +987,7 @@
       const q = (document.getElementById('brandSearchInp').value || '').trim().toLowerCase();
       const brandMap = {};
       allProducts.forEach(p => {
-        if (p.category === 'الأدوية' || (p.fia && p.fia.toLowerCase().includes('medicine'))) return;
+        if (p.fia && (p.fia.toLowerCase().includes('medicine') || p.fia.includes('ادويه') || p.fia.includes('أدوية'))) return;
         const firstWord = p.name.split(/\s+/)[0];
         if (!firstWord || firstWord.length < 2) return;
         if (!brandMap[firstWord]) brandMap[firstWord] = [];
@@ -1098,7 +1009,7 @@
         const rows = [];
         allProducts.filter(p => p.batches && p.batches.length).forEach(p => {
           p.batches.forEach(b => {
-            const o = { 'رقم الصنف': p.item_number, 'الباركود': p.barcode, 'اسم الصنف': p.name, 'القسم': p.category, 'تاريخ الصلاحية': b.exp, 'العدد': b.qty };
+            const o = { 'رقم الصنف': p.item_number, 'الباركود': p.barcode, 'اسم الصنف': p.name, 'تاريخ الصلاحية': b.exp, 'العدد': b.qty };
             if (isAdm) { o['السعر'] = p.price; o['الموظف المسجل'] = b.by; }
             rows.push(o);
           });
@@ -1113,15 +1024,15 @@
       if (type === 'fia') {
         const fVal = document.getElementById('fiaFilterInp').value.trim().toLowerCase();
         const rows = allProducts.filter(p => !fVal || p.fia.toLowerCase().includes(fVal)).map(p => {
-          const o = { 'رقم الصنف': p.item_number, 'الباركود': p.barcode, 'اسم الصنف': p.name, 'الفئة': p.fia, 'القسم': p.category };
+          const o = { 'رقم الصنف': p.item_number, 'الباركود': p.barcode, 'اسم الصنف': p.name, 'الفئة': p.fia };
           if (isAdm) o['السعر'] = p.price;
           return o;
         });
         return { title: `تقرير الفئة: ${fVal || 'الكل'}`, rows };
       }
       if (type === 'brand') {
-        const rows = allProducts.filter(p => p.category !== 'الأدوية' && p.name.startsWith(activeBrandName)).map(p => {
-          const o = { 'رقم الصنف': p.item_number, 'الباركود': p.barcode, 'اسم الصنف': p.name, 'القسم': p.category, 'الفئة': p.fia };
+        const rows = allProducts.filter(p => !(p.fia && p.fia.toLowerCase().includes('medicine')) && p.name.startsWith(activeBrandName)).map(p => {
+          const o = { 'رقم الصنف': p.item_number, 'الباركود': p.barcode, 'اسم الصنف': p.name, 'الفئة': p.fia };
           if (isAdm) o['السعر'] = p.price;
           return o;
         });
@@ -1237,7 +1148,10 @@
       if (!em || !nm) return;
       appConfig.employees.push({ email: em, name: nm, active: true });
       localStorage.setItem('ocare_app_config', JSON.stringify(appConfig));
+      document.getElementById('newEmpEmail').value = '';
+      document.getElementById('newEmpName').value = '';
       renderSettingsUI();
+      showToast('تمت الإضافة! اضغط زر نسخ رابط المزامنة بالأسفل لإرساله للزملاء');
     }
 
     function saveSecuritySettings() {
@@ -1250,7 +1164,7 @@
     }
 
     window.addEventListener('DOMContentLoaded', () => {
-      renderCategoriesStrip();
+      checkUrlSyncConfig();
       addExpiryBatchRow();
       const savedSession = localStorage.getItem('ocare_session_user');
       if (savedSession) {
