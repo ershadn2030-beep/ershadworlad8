@@ -67,7 +67,7 @@
 
     .module-tabs { display: flex; gap: 6px; overflow-x: auto; padding: 8px 12px; scrollbar-width: none; }
     .module-tabs::-webkit-scrollbar { display: none; }
-    .mod-btn { flex: 0 0 auto; padding: 8px 12px; border-radius: 12px; border: 1px solid var(--border); background: #FFF; font-size: 0.75rem; font-weight: 700; color: var(--muted); cursor: pointer; display: flex; align-items: center; gap: 4px; }
+    .mod-btn { flex: 0 0 auto; padding: 8px 12px; border-radius: 12px; border: 1.5px solid var(--border); background: #FFF; font-size: 0.75rem; font-weight: 700; color: var(--muted); cursor: pointer; display: flex; align-items: center; gap: 4px; }
     .mod-btn.active { background: var(--primary); color: #FFF; border-color: var(--primary); }
 
     .section-card { background: #FFF; border-radius: 18px; padding: 15px; margin: 8px 12px; border: 1px solid var(--border); box-shadow: 0 2px 8px rgba(0,0,0,0.03); }
@@ -190,10 +190,10 @@
       <button class="mod-btn" id="tabBtn_settings" style="display:none;" onclick="switchTab('settings')">⚙️ الإعدادات</button>
     </div>
 
-    <!-- 1. المخزون والأسعار (بدون فلاتر أقسام نهائياً) -->
+    <!-- 1. المخزون والأسعار -->
     <div id="view_inventory">
       <div id="adminDownloadExcelBanner" style="display:none; margin:8px 12px 2px;">
-        <button onclick="downloadFullClassifiedExcel()" style="width:100%; background:#16A34A; color:#FFF; border:none; padding:10px; border-radius:12px; font-weight:800; font-size:0.82rem; cursor:pointer; box-shadow:0 4px 10px rgba(22,163,74,0.2);">
+        <button onclick="downloadFullExcel()" style="width:100%; background:#16A34A; color:#FFF; border:none; padding:10px; border-radius:12px; font-weight:800; font-size:0.82rem; cursor:pointer; box-shadow:0 4px 10px rgba(22,163,74,0.2);">
           📥 تنزيل ملف الإكسل الكامل (17,338 صنفاً) .xlsx
         </button>
       </div>
@@ -921,7 +921,7 @@
     function handleSubModuleSelect(mod, uid) {
       if (mod === 'expiry') selectProductForExpiry(uid);
       else if (mod === 'barcodeOrder') { addItemToBarcodeOrder(uid); document.getElementById('boSearchResults').style.display = 'none'; document.getElementById('boSearchInp').value = ''; }
-      else if (mod === 'shortages') { addItemToShortages(uid); document.getElementById('shortSearchResults').style.display = 'none'; document.getElementById('shortSearchInp'].value = ''; }
+      else if (mod === 'shortages') { addItemToShortages(uid); document.getElementById('shortSearchResults').style.display = 'none'; document.getElementById('shortSearchInp').value = ''; }
     }
 
     function openScanner(mode) {
@@ -941,7 +941,7 @@
     }
 
     function stopScanner() {
-      if (scannerInstance) scannerInstance.stop().then(() => { scannerInstance.clear(); document.getElementById('scannerModal').style.display = 'none'; }).catch(() => document.getElementById('scannerModal'].style.display = 'none');
+      if (scannerInstance) scannerInstance.stop().then(() => { scannerInstance.clear(); document.getElementById('scannerModal').style.display = 'none'; }).catch(() => document.getElementById('scannerModal').style.display = 'none');
       else document.getElementById('scannerModal').style.display = 'none';
     }
 
