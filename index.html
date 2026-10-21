@@ -58,8 +58,11 @@
     .notif-dot { position: absolute; top: -3px; right: -3px; background: var(--danger); color: #FFF; font-size: 0.65rem; font-weight: 900; width: 18px; height: 18px; border-radius: 50%; display: none; align-items: center; justify-content: center; border: 2px solid var(--navy); }
     .role-pill { font-size: 0.7rem; padding: 4px 8px; border-radius: 12px; background: rgba(255,255,255,0.2); font-weight: 700; }
     .btn-exit { background: rgba(239,68,68,0.3); color: #FFF; border: 1px solid rgba(255,255,255,0.25); padding: 5px 9px; border-radius: 10px; font-size: 0.7rem; font-weight: 700; cursor: pointer; }
-    .live-sync-pill { display: inline-flex; align-items: center; gap: 4px; font-size: 0.66rem; background: rgba(16,185,129,0.22); border: 1px solid rgba(16,185,129,0.5); color: #A7F3D0; padding: 3px 7px; border-radius: 10px; font-weight: 700; }
+    .live-sync-pill { display: inline-flex; align-items: center; gap: 4px; font-size: 0.66rem; background: rgba(16,185,129,0.22); border: 1px solid rgba(16,185,129,0.5); color: #A7F3D0; padding: 3px 7px; border-radius: 10px; font-weight: 700; cursor: pointer; }
     .live-dot { width: 7px; height: 7px; border-radius: 50%; background: #10B981; box-shadow: 0 0 6px #10B981; }
+
+    /* تنبيه قفل قاعدة البيانات */
+    #dbLockedBanner { display: none; background: #FEE2E2; color: #991B1B; border: 1.5px solid #EF4444; margin: 8px 12px; padding: 10px 12px; border-radius: 14px; font-size: 0.76rem; font-weight: 700; line-height: 1.5; }
 
     /* البحث */
     .search-bar { position: relative; display: flex; align-items: center; }
@@ -131,7 +134,7 @@
 </head>
 <body>
 
-  <!-- شاشة تسجيل الدخول -->
+  <!-- شاشة تسجيل الدخول المحمية -->
   <div id="loginOverlay">
     <div class="login-card">
       <div class="ocare-logo-wrap">
@@ -144,13 +147,13 @@
         </svg>
         <span class="ocare-text-en">CARE</span>
       </div>
-      <h2>تسجيل الدخول</h2>
-      <p>أدخل البريد الإلكتروني (أو الاسم) ورمز المرور</p>
+      <h2>تسجيل الدخول المعتمد</h2>
+      <p>الدخول متاح فقط للحسابات المسجلة والمعتمدة من المطور</p>
 
       <form onsubmit="handleLogin(event)">
         <div class="form-group">
-          <label>البريد الإلكتروني أو الاسم *</label>
-          <input type="text" id="loginEmail" required placeholder="example@gmail.com أو اسمك">
+          <label>البريد الإلكتروني أو اسم المستخدم المعتمد *</label>
+          <input type="text" id="loginEmail" required placeholder="أدخل اسمك أو إيميلك المسجل لدى المطور">
         </div>
         <div class="form-group">
           <label>كلمة المرور / الرمز السري *</label>
@@ -178,9 +181,9 @@
           </div>
         </div>
         <div class="header-actions">
-          <span class="live-sync-pill" id="liveSyncStatus" title="حالة المزامنة السحابية المباشرة">
+          <span class="live-sync-pill" id="liveSyncStatus" onclick="forceSyncNow()" title="اضغط للمزامنة الفورية">
             <span class="live-dot" id="liveSyncDot"></span>
-            <span id="liveSyncText">متزامن</span>
+            <span id="liveSyncText">يتصل...</span>
           </span>
           <button class="icon-badge-btn" id="pwaInstallBtn" style="display:none;" onclick="installPWA()" title="تثبيت التطبيق">📲</button>
           <button class="icon-badge-btn" onclick="switchTab('notes')" title="ملاحظات الشفت والتنبيهات">
@@ -197,6 +200,11 @@
         <button class="c-btn" onclick="openScanner('search')" title="مسح الباركود">📷</button>
       </div>
     </header>
+
+    <!-- تنبيه يظهر فقط إذا كانت قواعد Firebase مقفلة على false -->
+    <div id="dbLockedBanner">
+      ⚠️ <strong>تنبيه هام للمطور:</strong> قاعدة بيانات Firebase لديك على وضع القفل (Locked Mode). لتفعيل التزامن بين الجوال والكمبيوتر، افتح تبويب <strong>Rules</strong> في صفحة Firebase واجعل القيمتين <code>".read": true</code> و <code>".write": true</code> ثم اضغط <strong>Publish</strong>.
+    </div>
 
     <!-- شريط التنقل العلوي -->
     <div class="module-tabs">
@@ -423,16 +431,16 @@
       </div>
 
       <div class="section-card">
-        <div class="section-title"><span>👥 إدارة حسابات الزملاء (مزامنة سحابية فورية Firebase)</span></div>
-        <p style="font-size:0.74rem; color:var(--muted); margin-bottom:8px;">أي موظف تضيفه أو توقف حسابه أو تحذفه هنا (أو من داخل Firebase) يتفعل أو يُلغى فوراً على جميع الجوالات في نفس الثانية:</p>
+        <div class="section-title"><span>👥 إدارة الحسابات المعتمدة (مزامنة سحابية صارمة)</span></div>
+        <p style="font-size:0.74rem; color:var(--muted); margin-bottom:8px;">🔒 <strong>حماية صارمة:</strong> لن يتمكن أي شخص من الدخول للنظام إلا إذا كان اسمه أو إيميله مضافاً ومفعّلاً في هذه القائمة:</p>
         <div style="display:grid; grid-template-columns: 1.2fr 1fr 0.8fr auto; gap:6px; margin-bottom:10px;">
-          <input type="text" id="newEmpEmail" placeholder="إيميل أو معرف الزميل" style="padding:8px; border-radius:8px; border:1px solid var(--border); font-size:0.78rem;">
-          <input type="text" id="newEmpName" placeholder="الاسم (مثل: د. أحمد)" style="padding:8px; border-radius:8px; border:1px solid var(--border); font-size:0.78rem;">
+          <input type="text" id="newEmpEmail" placeholder="إيميل أو معرف الدخول" style="padding:8px; border-radius:8px; border:1px solid var(--border); font-size:0.78rem;">
+          <input type="text" id="newEmpName" placeholder="اسم الموظف (مثل: أحمد)" style="padding:8px; border-radius:8px; border:1px solid var(--border); font-size:0.78rem;">
           <input type="text" id="newEmpCustomPin" placeholder="رمز خاص (اختياري)" style="padding:8px; border-radius:8px; border:1px solid var(--border); font-size:0.78rem;">
           <button class="mini-act-btn" style="background:var(--navy); color:#fff;" onclick="addAuthorizedEmployee()">➕ إضافة</button>
         </div>
         <div id="authorizedEmployeesList"></div>
-        <button class="btn-main" style="background:#0D9488; margin-top:10px;" onclick="copyEmployeeSyncLink()">📲 نسخ رابط الموقع لإرساله للزملاء</button>
+        <button class="btn-main" style="background:#0D9488; margin-top:10px;" onclick="forcePushLocalToCloud()">☁️ رفع ومزامنة بيانات هذا الجهاز إلى السحابة الآن</button>
       </div>
 
       <div class="section-card">
@@ -447,7 +455,7 @@
             <input type="text" id="setAdminPin">
           </div>
           <div class="form-group">
-            <label>رمز دخول الموظفين العام (1235):</label>
+            <label>رمز دخول الموظفين المعتمدين (1235):</label>
             <input type="text" id="setEmpPin">
           </div>
         </div>
@@ -545,7 +553,7 @@
     }
 
     let appConfig = JSON.parse(localStorage.getItem('ocare_app_config') || 'null') || {
-      adminEmails: ['ershadn2030@gmail.com', 'ershad@gmail.com', 'admin@ocare.com'],
+      adminEmails: ['ershadn2030@gmail.com', 'ershad@gmail.com', 'admin@ocare.com', 'إرشاد', 'ارشاد', 'ershad'],
       adminPin: '2020',
       empPin: '1235',
       employees: [
@@ -574,50 +582,81 @@
       setTimeout(() => t.classList.remove('show'), 2600);
     }
 
+    function updateSyncBadgeUI(state) {
+      const dot = document.getElementById('liveSyncDot');
+      const txt = document.getElementById('liveSyncText');
+      const banner = document.getElementById('dbLockedBanner');
+      if (!dot || !txt) return;
+      if (state === 'online') {
+        dot.style.background = '#10B981';
+        dot.style.boxShadow = '0 0 6px #10B981';
+        txt.innerText = 'متزامن لحظياً';
+        if (banner) banner.style.display = 'none';
+      } else if (state === 'locked') {
+        dot.style.background = '#EF4444';
+        dot.style.boxShadow = '0 0 6px #EF4444';
+        txt.innerText = 'مقفل (Rules)';
+        if (banner) banner.style.display = 'block';
+      } else {
+        dot.style.background = '#F59E0B';
+        dot.style.boxShadow = 'none';
+        txt.innerText = 'وضع محلي';
+      }
+    }
+
     // دالة رفع التحديثات إلى Firebase فوراً
     function pushDataToFirebase(sectionKey, dataValue) {
       if (!cloudRef || isApplyingRemoteUpdate) return;
-      cloudRef.child(sectionKey).set(dataValue).catch(() => {});
+      cloudRef.child(sectionKey).set(dataValue).then(() => {
+        updateSyncBadgeUI('online');
+      }).catch((err) => {
+        if (err && (err.code === 'PERMISSION_DENIED' || String(err.message).includes('permission_denied'))) {
+          updateSyncBadgeUI('locked');
+        }
+      });
     }
 
-    // الاستماع اللحظي من Firebase لتحديث جوال المطور وجوالات الموظفين في نفس الثانية
+    // رفع بيانات الجهاز الحالية بالكامل إلى السحابة (عند الضغط على الزر)
+    function forcePushLocalToCloud() {
+      if (!cloudRef) return;
+      cloudRef.set({
+        appConfig: appConfig,
+        savedBatches: JSON.parse(localStorage.getItem('ocare_saved_batches') || '{}'),
+        barcodeOrders: barcodeOrders,
+        shortagesList: shortagesList,
+        shiftNotes: shiftNotes,
+        customProducts: customCloudProducts
+      }).then(() => {
+        updateSyncBadgeUI('online');
+        showToast('✅ تمت مزامنة ورفع جميع البيانات للسحابة بنجاح!');
+      }).catch(() => {
+        updateSyncBadgeUI('locked');
+        alert('قاعدة البيانات مقفلة (Locked Mode)! افتح تبويب Rules في Firebase واجعل القيمتين true ثم اضغط Publish.');
+      });
+    }
+
+    function forceSyncNow() {
+      forcePushLocalToCloud();
+    }
+
+    // الاستماع اللحظي الفوري من Firebase (يعمل فور فتح التطبيق دون انتظار الإكسل)
     function initRealtimeFirebaseSync() {
       if (!db || !cloudRef) return;
 
-      db.ref('.info/connected').on('value', (snap) => {
-        const dot = document.getElementById('liveSyncDot');
-        const txt = document.getElementById('liveSyncText');
-        if (!dot || !txt) return;
-        if (snap.val() === true) {
-          dot.style.background = '#10B981';
-          txt.innerText = 'متزامن لحظياً';
-        } else {
-          dot.style.background = '#F59E0B';
-          txt.innerText = 'وضع محلي';
-        }
-      });
-
       cloudRef.on('value', (snapshot) => {
+        updateSyncBadgeUI('online');
         const data = snapshot.val();
         if (!data) {
-          // أول تشغيل: نرفع البيانات الحالية لقاعدة البيانات حتى تظهر في لوحة Firebase
-          cloudRef.set({
-            appConfig: appConfig,
-            savedBatches: JSON.parse(localStorage.getItem('ocare_saved_batches') || '{}'),
-            barcodeOrders: barcodeOrders,
-            shortagesList: shortagesList,
-            shiftNotes: shiftNotes,
-            customProducts: customCloudProducts
-          });
+          forcePushLocalToCloud();
           return;
         }
 
         isApplyingRemoteUpdate = true;
 
-        // 1. مزامنة إعدادات الدخول وحسابات الموظفين (مع الطرد الفوري لمن يُلغى حسابه)
+        // 1. مزامنة إعدادات الدخول وحسابات الموظفين المعتمدة
         if (data.appConfig) {
           appConfig = {
-            adminEmails: data.appConfig.adminEmails || ['ershadn2030@gmail.com', 'ershad@gmail.com', 'admin@ocare.com'],
+            adminEmails: data.appConfig.adminEmails || ['ershadn2030@gmail.com', 'ershad@gmail.com', 'admin@ocare.com', 'إرشاد', 'ارشاد', 'ershad'],
             adminPin: String(data.appConfig.adminPin || '2020'),
             empPin: String(data.appConfig.empPin || '1235'),
             employees: Array.isArray(data.appConfig.employees)
@@ -626,11 +665,11 @@
           };
           localStorage.setItem('ocare_app_config', JSON.stringify(appConfig));
 
-          // التحقق الفوري إذا تم إيقاف أو حذف الموظف الحالي من Firebase
+          // طرد فوري لأي موظف غير مسجل أو تم إيقاف/حذف حسابه
           if (currentUser && currentUser.role === 'employee') {
-            const matchedEmp = appConfig.employees.find(u => u && u.email && u.email.toLowerCase() === currentUser.email.toLowerCase());
-            if (matchedEmp && matchedEmp.active === false) {
-              alert('تم إيقاف حسابك من قِبل المطور.');
+            const matchedEmp = findAuthorizedEmployee(currentUser.email);
+            if (!matchedEmp || matchedEmp.active === false) {
+              alert('⛔ تم إيقاف أو إلغاء صلاحية هذا الحساب من قِبل المطور.');
               handleLogout();
             }
           }
@@ -649,28 +688,32 @@
         const cloudBatches = data.savedBatches || {};
         localStorage.setItem('ocare_saved_batches', JSON.stringify(cloudBatches));
 
-        // دمج الأصناف وتواريخها
         rebuildAllProductsList(cloudBatches);
 
-        // 4. مزامنة أوامر طباعة الباركود
-        barcodeOrders = data.barcodeOrders
-          ? (Array.isArray(data.barcodeOrders) ? data.barcodeOrders : Object.values(data.barcodeOrders))
-          : [];
-        localStorage.setItem('ocare_barcode_orders', JSON.stringify(barcodeOrders));
+        // 4. مزامنة أوامر طباعة الباركود (مع دمج أي بيانات محلية لم تُرفع بعد)
+        if (data.barcodeOrders) {
+          barcodeOrders = Array.isArray(data.barcodeOrders) ? data.barcodeOrders : Object.values(data.barcodeOrders);
+          localStorage.setItem('ocare_barcode_orders', JSON.stringify(barcodeOrders));
+        } else if (barcodeOrders.length > 0) {
+          cloudRef.child('barcodeOrders').set(barcodeOrders);
+        }
 
         // 5. مزامنة النواقص وطلبات الفروع
-        shortagesList = data.shortagesList
-          ? (Array.isArray(data.shortagesList) ? data.shortagesList : Object.values(data.shortagesList))
-          : [];
-        localStorage.setItem('ocare_shortages_list', JSON.stringify(shortagesList));
+        if (data.shortagesList) {
+          shortagesList = Array.isArray(data.shortagesList) ? data.shortagesList : Object.values(data.shortagesList);
+          localStorage.setItem('ocare_shortages_list', JSON.stringify(shortagesList));
+        } else if (shortagesList.length > 0) {
+          cloudRef.child('shortagesList').set(shortagesList);
+        }
 
         // 6. مزامنة ملاحظات الشفت والتنبيهات
-        shiftNotes = data.shiftNotes
-          ? (Array.isArray(data.shiftNotes) ? data.shiftNotes : Object.values(data.shiftNotes))
-          : [];
-        localStorage.setItem('ocare_shift_notes', JSON.stringify(shiftNotes));
+        if (data.shiftNotes) {
+          shiftNotes = Array.isArray(data.shiftNotes) ? data.shiftNotes : Object.values(data.shiftNotes);
+          localStorage.setItem('ocare_shift_notes', JSON.stringify(shiftNotes));
+        } else if (shiftNotes.length > 0) {
+          cloudRef.child('shiftNotes').set(shiftNotes);
+        }
 
-        // تحديث جميع الواجهات الحية
         renderInventory();
         renderRegisteredExpiryList();
         renderBarcodeOrders();
@@ -679,6 +722,12 @@
         updateNotifBadge();
 
         isApplyingRemoteUpdate = false;
+      }, (err) => {
+        if (err && (err.code === 'PERMISSION_DENIED' || String(err.message).includes('permission_denied'))) {
+          updateSyncBadgeUI('locked');
+        } else {
+          updateSyncBadgeUI('offline');
+        }
       });
     }
 
@@ -731,36 +780,7 @@
       showToast('✅ تم حفظ الصنف ومزامنته مع جميع الجوالات فوراً!');
     }
 
-    // مزامنة إعدادات وحسابات الموظفين عبر الرابط الذكي فور فتحه على جوال أي موظف
-    function checkUrlSyncConfig() {
-      try {
-        const params = new URLSearchParams(window.location.search);
-        const syncData = params.get('sync');
-        if (syncData) {
-          const decoded = JSON.parse(decodeURIComponent(escape(atob(syncData))));
-          if (decoded && decoded.employees) {
-            appConfig = decoded;
-            localStorage.setItem('ocare_app_config', JSON.stringify(appConfig));
-            pushDataToFirebase('appConfig', appConfig);
-            window.history.replaceState({}, document.title, window.location.pathname);
-            setTimeout(() => showToast('✅ تمت مزامنة حسابات الزملاء على هذا الجوال بنجاح!'), 500);
-          }
-        }
-      } catch (e) {}
-    }
-
-    function copyEmployeeSyncLink() {
-      try {
-        const syncUrl = window.location.origin + window.location.pathname;
-        navigator.clipboard.writeText(syncUrl).then(() => {
-          alert('تم نسخ رابط المنظومة بنجاح! جميع الحسابات والبيانات متزامنة سحابياً عبر Firebase وتعمل فوراً لدى الجميع.');
-        }).catch(() => {
-          prompt('انسخ هذا الرابط وأرسله للزملاء:', syncUrl);
-        });
-      } catch (e) {}
-    }
-
-    // قراءة ملف الإكسل أو CSV تلقائياً فور فتح التطبيق بدون أقسام
+    // قراءة ملف الإكسل أو CSV تلقائياً فور فتح التطبيق
     async function autoLoadInventoryFromServer() {
       const savedBatches = JSON.parse(localStorage.getItem('ocare_saved_batches') || '{}');
       const excelFilesToTry = ['تحديد السعر والقسم.xlsx', 'pharmacy_data.xlsx', 'inventory.xlsx'];
@@ -804,7 +824,6 @@
         } catch (e) {}
       }
 
-      // في حال وجود ملف pharmacy_data.csv
       try {
         const res = await fetch('pharmacy_data.csv');
         if (res.ok) {
@@ -839,7 +858,6 @@
       document.getElementById('fiaDatalist').innerHTML = fiaSet.map(f => `<option value="${f}">`).join('');
     }
 
-    // تنزيل ملف الإكسل الكامل
     function downloadFullClassifiedExcel() {
       if (!allProducts.length) return alert('تأكد من وجود ملف تحديد السعر والقسم.xlsx بجانب ملف الكود');
       const exportRows = allProducts.map(p => ({
@@ -878,36 +896,56 @@
       });
     }
 
-    // تسجيل الدخول المرن (يدعم المطور 2020 + حسابات الموظفين المتزامنة مع Firebase)
+    // التحقق الصارم من وجود الموظف في قائمة الحسابات المعتمدة فقط
+    function findAuthorizedEmployee(inputStr) {
+      const clean = String(inputStr || '').trim().toLowerCase();
+      if (!clean) return null;
+      return (appConfig.employees || []).find(u => {
+        if (!u) return false;
+        const em = String(u.email || '').trim().toLowerCase();
+        const nm = String(u.name || '').trim().toLowerCase();
+        return em === clean || nm === clean;
+      });
+    }
+
+    // تسجيل الدخول المحمي (يرفض أي اسم أو حساب غير مسجل لدى المطور)
     function handleLogin(e) {
       e.preventDefault();
       const emailInput = document.getElementById('loginEmail').value.trim();
       const emailLow = emailInput.toLowerCase();
       const pass = document.getElementById('loginPass').value.trim();
-      const isAdminEmail = (appConfig.adminEmails || []).some(a => a.toLowerCase() === emailLow);
 
-      // فحص ما إذا كان الموظف مسجلاً في قائمة الموظفين
-      const matchedEmp = (appConfig.employees || []).find(
-        u => u && ((u.email && u.email.toLowerCase() === emailLow) || (u.name && u.name.trim() === emailInput))
-      );
+      const allowedAdmins = (appConfig.adminEmails || []).map(a => String(a).trim().toLowerCase());
+      const isDeveloperIdentity = allowedAdmins.includes(emailLow) || emailLow === 'ershad' || emailInput === 'إرشاد' || emailInput === 'ارشاد';
 
-      if (matchedEmp && matchedEmp.active === false) {
-        return alert('عذراً، هذا الحساب موقوف حالياً من قِبل المطور!');
+      // 1. دخول المطور
+      if (isDeveloperIdentity && pass === String(appConfig.adminPin)) {
+        currentUser = { email: emailLow, name: 'إرشاد (المطور)', role: 'admin' };
+        localStorage.setItem('ocare_session_user', JSON.stringify(currentUser));
+        document.getElementById('loginOverlay').style.display = 'none';
+        applyPermissionsUI();
+        showToast(`مرحباً بك، ${currentUser.name} 👋`);
+        return;
       }
 
-      if (pass === appConfig.adminPin && (isAdminEmail || emailLow.includes('ershad') || emailLow.includes('admin') || emailInput.includes('إرشاد') || emailInput.includes('ارشاد'))) {
-        currentUser = { email: emailLow, name: 'إرشاد (المطور)', role: 'admin' };
-      } else if (pass === appConfig.adminPin && isAdminEmail) {
-        currentUser = { email: emailLow, name: 'إرشاد (المطور)', role: 'admin' };
-      } else if (matchedEmp && matchedEmp.pin && String(matchedEmp.pin).trim() !== '' && pass === String(matchedEmp.pin).trim()) {
-        currentUser = { email: matchedEmp.email.toLowerCase(), name: matchedEmp.name, role: 'employee' };
-      } else if (pass === appConfig.empPin) {
-        const displayName = matchedEmp ? matchedEmp.name : (emailInput.includes('@') ? emailInput.split('@')[0] : emailInput);
-        currentUser = { email: emailLow, name: displayName, role: 'employee' };
-      } else {
-        return alert('كلمة المرور أو بيانات الدخول غير صحيحة!');
+      // 2. دخول الموظفين: يجب أن يكون الاسم أو الإيميل مسجلاً مسبقاً في قائمة الموظفين
+      const matchedEmp = findAuthorizedEmployee(emailInput);
+      if (!matchedEmp) {
+        return alert('⛔ غير مصرح لك بالدخول!\nهذا الاسم أو البريد غير مسجل في قائمة الموظفين المعتمدة لدى المطور.');
       }
 
+      if (matchedEmp.active === false) {
+        return alert('⛔ تم إيقاف هذا الحساب من قِبل المطور!');
+      }
+
+      const empSpecificPin = String(matchedEmp.pin || '').trim();
+      const validEmpPass = empSpecificPin !== '' ? (pass === empSpecificPin) : (pass === String(appConfig.empPin));
+
+      if (!validEmpPass) {
+        return alert('⛔ كلمة المرور / الرمز السري غير صحيح!');
+      }
+
+      currentUser = { email: matchedEmp.email.toLowerCase(), name: matchedEmp.name, role: 'employee' };
       localStorage.setItem('ocare_session_user', JSON.stringify(currentUser));
       document.getElementById('loginOverlay').style.display = 'none';
       applyPermissionsUI();
@@ -1402,8 +1440,8 @@
       document.getElementById('authorizedEmployeesList').innerHTML = (appConfig.employees || []).map((u, i) => `
         <div class="prod-card" style="margin-bottom:6px; padding:8px 12px; opacity:${u.active === false ? '0.55' : '1'};">
           <div>
-            <strong style="font-size:0.82rem;">${u.name} ${u.active === false ? '<span style="color:red;">(موقوف)</span>' : '<span style="color:green;">(نشط)</span>'}</strong>
-            <div style="font-size:0.72rem; color:var(--muted);">${u.email} ${u.pin ? `| رمز خاص: ${u.pin}` : ''}</div>
+            <strong style="font-size:0.82rem;">${u.name} ${u.active === false ? '<span style="color:red;">(موقوف)</span>' : '<span style="color:green;">(معتمد)</span>'}</strong>
+            <div style="font-size:0.72rem; color:var(--muted);">معرف الدخول: <strong>${u.email}</strong> | الرمز: <strong>${u.pin || appConfig.empPin}</strong></div>
           </div>
           <div style="display:flex; gap:5px;">
             <button class="mini-act-btn" style="background:${u.active === false ? '#DCFCE7' : '#FEF3C7'}; color:${u.active === false ? '#166534' : '#92400E'};" onclick="toggleEmployeeActive(${i})">${u.active === false ? 'تفعيل' : 'إيقاف'}</button>
@@ -1458,17 +1496,23 @@
     }
 
     window.addEventListener('DOMContentLoaded', () => {
-      checkUrlSyncConfig();
       addExpiryBatchRow();
+      // تشغيل المزامنة الفورية منذ اللحظة الأولى
+      initRealtimeFirebaseSync();
+
       const savedSession = localStorage.getItem('ocare_session_user');
       if (savedSession) {
-        currentUser = JSON.parse(savedSession);
-        document.getElementById('loginOverlay').style.display = 'none';
-        applyPermissionsUI();
+        const parsed = JSON.parse(savedSession);
+        // التحقق من أن الجلسة المحفوظة تتبع حساباً معتمداً
+        if (parsed.role === 'admin' || findAuthorizedEmployee(parsed.email)) {
+          currentUser = parsed;
+          document.getElementById('loginOverlay').style.display = 'none';
+          applyPermissionsUI();
+        } else {
+          localStorage.removeItem('ocare_session_user');
+        }
       }
-      autoLoadInventoryFromServer().then(() => {
-        initRealtimeFirebaseSync();
-      });
+      autoLoadInventoryFromServer();
     });
   </script>
 </body>
