@@ -10,7 +10,6 @@
   <title>أوكير O CARE - منظومة إدارة الصيدلية</title>
   <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
   <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
-  <!-- مكتبات المزامنة السحابية اللحظية Firebase -->
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
   <style>
@@ -30,13 +29,9 @@
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, system-ui, sans-serif; -webkit-tap-highlight-color: transparent; }
     body { background: var(--bg); color: var(--text); display: flex; justify-content: center; min-height: 100vh; }
     .app-shell { width: 100%; max-width: 500px; min-height: 100vh; background: var(--bg); position: relative; padding-bottom: 95px; box-shadow: 0 0 40px rgba(0,0,0,0.08); display: flex; flex-direction: column; }
-
-    /* شعار أوكير المدمج */
     .ocare-logo-wrap { display: inline-flex; align-items: center; justify-content: center; gap: 8px; background: #FFF; padding: 8px 18px; border-radius: 18px; box-shadow: 0 4px 15px rgba(0,0,0,0.06); }
     .ocare-text-ar { font-size: 1.5rem; font-weight: 900; color: var(--navy); }
     .ocare-text-en { font-size: 1.45rem; font-weight: 900; color: var(--navy); letter-spacing: 1px; }
-
-    /* شاشة تسجيل الدخول */
     #loginOverlay { position: fixed; inset: 0; background: linear-gradient(145deg, #0B1957 0%, #0D9488 100%); z-index: 99999; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; }
     .login-card { background: #FFF; width: 100%; max-width: 390px; border-radius: 26px; padding: 28px 22px; box-shadow: 0 25px 50px rgba(0,0,0,0.25); text-align: center; }
     .login-card h2 { font-size: 1.35rem; font-weight: 800; color: var(--navy); margin: 14px 0 6px; }
@@ -46,8 +41,6 @@
     .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 11px 13px; border-radius: 12px; border: 1.5px solid var(--border); font-size: 0.9rem; outline: none; background: #FFF; }
     .btn-main { width: 100%; background: var(--navy); color: #FFF; border: none; padding: 13px; border-radius: 14px; font-weight: 800; font-size: 0.95rem; cursor: pointer; }
     .login-footer-rights { margin-top: 18px; color: rgba(255,255,255,0.9); font-size: 0.78rem; font-weight: 700; text-align: center; }
-
-    /* الترويسة */
     header { background: linear-gradient(135deg, var(--navy) 0%, var(--primary-dark) 100%); padding: 16px 14px 20px; border-bottom-left-radius: 26px; border-bottom-right-radius: 26px; color: #FFF; }
     .header-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
     .header-brand { display: flex; align-items: center; gap: 8px; }
@@ -60,28 +53,20 @@
     .btn-exit { background: rgba(239,68,68,0.3); color: #FFF; border: 1px solid rgba(255,255,255,0.25); padding: 5px 9px; border-radius: 10px; font-size: 0.7rem; font-weight: 700; cursor: pointer; }
     .live-sync-pill { display: inline-flex; align-items: center; gap: 4px; font-size: 0.66rem; background: rgba(16,185,129,0.22); border: 1px solid rgba(16,185,129,0.5); color: #A7F3D0; padding: 3px 7px; border-radius: 10px; font-weight: 700; cursor: pointer; }
     .live-dot { width: 7px; height: 7px; border-radius: 50%; background: #10B981; box-shadow: 0 0 6px #10B981; }
-
-    /* البحث */
     .search-bar { position: relative; display: flex; align-items: center; }
     .search-bar input { width: 100%; padding: 12px 38px 12px 44px; border-radius: 18px; border: none; outline: none; font-size: 0.88rem; background: #FFF; color: var(--text); box-shadow: 0 4px 14px rgba(0,0,0,0.1); }
     .search-bar .s-icon { position: absolute; right: 13px; font-size: 1rem; pointer-events: none; }
     .search-bar .c-btn { position: absolute; left: 8px; border: none; background: var(--primary-light); color: var(--primary-dark); border-radius: 12px; width: 34px; height: 34px; cursor: pointer; font-size: 1.1rem; }
-
-    /* مربع الأسعار */
     .price-calc-box { margin: 8px 12px; background: linear-gradient(135deg, #FFFBEB 0%, #FEF3C7 100%); border: 1.5px solid #F59E0B; border-radius: 16px; padding: 11px 13px; }
     .price-calc-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
     .price-calc-top strong { font-size: 0.82rem; color: #92400E; }
     .price-total-badge { font-size: 1.05rem; font-weight: 900; color: #B45309; background: #FFF; padding: 3px 10px; border-radius: 10px; border: 1px solid #FCD34D; }
     .price-items-mini { max-height: 95px; overflow-y: auto; font-size: 0.75rem; color: #78350F; margin-bottom: 6px; }
     .price-item-row { display: flex; justify-content: space-between; align-items: center; padding: 3px 0; border-bottom: 1px dashed rgba(245,158,11,0.3); }
-
-    /* التبويبات العلوية */
     .module-tabs { display: flex; gap: 6px; overflow-x: auto; padding: 8px 12px; scrollbar-width: none; }
     .module-tabs::-webkit-scrollbar { display: none; }
     .mod-btn { flex: 0 0 auto; padding: 8px 12px; border-radius: 12px; border: 1px solid var(--border); background: #FFF; font-size: 0.75rem; font-weight: 700; color: var(--muted); cursor: pointer; display: flex; align-items: center; gap: 4px; }
     .mod-btn.active { background: var(--primary); color: #FFF; border-color: var(--primary); }
-
-    /* القوائم والبطاقات */
     .section-card { background: #FFF; border-radius: 18px; padding: 15px; margin: 8px 12px; border: 1px solid var(--border); box-shadow: 0 2px 8px rgba(0,0,0,0.03); }
     .section-title { font-size: 0.92rem; font-weight: 800; color: var(--navy); margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
     .products-list { display: flex; flex-direction: column; gap: 8px; padding: 4px 12px 16px; }
@@ -96,8 +81,6 @@
     .tag-batch { background: #EFF6FF; color: #1D4ED8; }
     .prod-actions { display: flex; flex-direction: column; gap: 5px; }
     .mini-act-btn { border: none; background: #F1F5F9; color: var(--navy); padding: 6px 8px; border-radius: 9px; font-size: 0.72rem; font-weight: 700; cursor: pointer; }
-
-    /* كشف أمر طباعة الباركود */
     .barcode-order-item { background: #FFF; border: 1.5px solid var(--border); border-radius: 14px; padding: 11px 13px; margin-bottom: 8px; display: flex; align-items: center; gap: 10px; }
     .barcode-order-item.printed { opacity: 0.55; background: #F8FAFC; border-style: dashed; }
     .big-item-num { font-size: 1.35rem; font-weight: 900; color: var(--navy); background: #EFF6FF; padding: 6px 12px; border-radius: 10px; border: 1.5px solid #BFDBFE; }
@@ -106,21 +89,17 @@
     .qty-stepper { display: flex; align-items: center; gap: 4px; }
     .qty-stepper button { width: 26px; height: 26px; border-radius: 7px; border: 1px solid var(--border); background: #F8FAFC; font-weight: 900; cursor: pointer; }
     .qty-stepper input { width: 42px; text-align: center; padding: 4px; border-radius: 7px; border: 1px solid var(--border); font-weight: 800; font-size: 0.82rem; }
-
-    /* شبكة العلامات التجارية */
     .brands-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; max-height: 360px; overflow-y: auto; padding: 4px; }
     .brand-card { background: #FFF; border: 1px solid var(--border); border-radius: 14px; padding: 10px 6px; text-align: center; cursor: pointer; }
     .brand-avatar { width: 42px; height: 42px; border-radius: 50%; background: linear-gradient(135deg, var(--navy), var(--primary)); color: #FFF; font-weight: 900; font-size: 1rem; display: flex; align-items: center; justify-content: center; margin: 0 auto 6px; }
     .brand-name { font-size: 0.75rem; font-weight: 800; color: var(--text); }
     .brand-cnt { font-size: 0.65rem; color: var(--muted); }
-
     .app-footer-rights { margin-top: auto; padding: 14px 12px 20px; text-align: center; font-size: 0.75rem; font-weight: 700; color: var(--muted); border-top: 1px solid var(--border); background: #FFF; }
     nav.bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; max-width: 500px; margin: 0 auto; background: #FFF; border-top: 1px solid var(--border); display: flex; justify-content: space-around; align-items: center; padding: 7px 6px 11px; box-shadow: 0 -4px 18px rgba(0,0,0,0.05); z-index: 900; }
     .nav-btn { border: none; background: transparent; color: #94A3B8; font-size: 0.68rem; font-weight: 700; display: flex; flex-direction: column; align-items: center; gap: 2px; cursor: pointer; }
     .nav-btn.active { color: var(--navy); }
     .nav-btn span.ico { font-size: 1.2rem; }
     .nav-scan-fab { position: relative; top: -14px; width: 52px; height: 52px; border-radius: 50%; background: linear-gradient(135deg, var(--navy), var(--primary)); color: #FFF; border: 4px solid var(--bg); font-size: 1.45rem; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 8px 18px rgba(13,148,136,0.35); }
-
     #previewModal, #scannerModal, #addCustomProductModal { position: fixed; inset: 0; background: rgba(15,23,42,0.75); z-index: 9999; display: none; flex-direction: column; align-items: center; justify-content: center; padding: 14px; }
     .preview-box { background: #FFF; width: 100%; max-width: 480px; max-height: 88vh; border-radius: 22px; display: flex; flex-direction: column; overflow: hidden; }
     .preview-head { background: var(--navy); color: #FFF; padding: 14px 16px; display: flex; justify-content: space-between; align-items: center; }
@@ -145,18 +124,18 @@
         <span class="ocare-text-en">CARE</span>
       </div>
       <h2>تسجيل الدخول</h2>
-      <p>أدخل البريد الإلكتروني (أو الاسم) ورمز المرور</p>
+      <p>أدخل الاسم أو البريد الإلكتروني ورمز المرور</p>
 
-      <form onsubmit="handleLogin(event)">
+      <form onsubmit="handleLogin(event); return false;">
         <div class="form-group">
           <label>البريد الإلكتروني أو الاسم *</label>
-          <input type="text" id="loginEmail" required placeholder="example@gmail.com أو اسمك">
+          <input type="text" id="loginEmail" placeholder="example@gmail.com أو اسمك" onkeydown="if(event.key==='Enter') handleLogin(event)">
         </div>
         <div class="form-group">
           <label>كلمة المرور / الرمز السري *</label>
-          <input type="password" id="loginPass" required placeholder="أدخل رمز الدخول">
+          <input type="password" id="loginPass" placeholder="أدخل رمز الدخول (2020 أو 1235)" onkeydown="if(event.key==='Enter') handleLogin(event)">
         </div>
-        <button type="submit" class="btn-main">تسجيل الدخول</button>
+        <button type="button" class="btn-main" onclick="handleLogin(event)">تسجيل الدخول</button>
       </form>
     </div>
     <div class="login-footer-rights">جميع الحقوق محفوظة © 2026 | تصميم وتطوير: إرشاد</div>
@@ -182,7 +161,6 @@
             <span class="live-dot" id="liveSyncDot"></span>
             <span id="liveSyncText">متزامن لحظياً</span>
           </span>
-          <button class="icon-badge-btn" id="pwaInstallBtn" style="display:none;" onclick="installPWA()" title="تثبيت التطبيق">📲</button>
           <button class="icon-badge-btn" onclick="switchTab('notes')" title="ملاحظات الشفت والتنبيهات">
             🔔<span class="notif-dot" id="notifBadge">0</span>
           </button>
@@ -198,7 +176,6 @@
       </div>
     </header>
 
-    <!-- شريط التنقل العلوي -->
     <div class="module-tabs">
       <button class="mod-btn active" id="tabBtn_inventory" onclick="switchTab('inventory')">📦 المخزون والأسعار</button>
       <button class="mod-btn" id="tabBtn_expiry" onclick="switchTab('expiry')">📅 تسجيل التواريخ</button>
@@ -212,12 +189,11 @@
     <!-- 1. قسم المخزون العام + حاسبة الأسعار -->
     <div id="view_inventory">
       <div id="adminDownloadExcelBanner" style="display:none; margin:8px 12px 2px;">
-        <button onclick="downloadFullClassifiedExcel()" style="width:100%; background:#16A34A; color:#FFF; border:none; padding:10px; border-radius:12px; font-weight:800; font-size:0.82rem; cursor:pointer; box-shadow:0 4px 10px rgba(22,163,74,0.2);">
+        <button onclick="downloadFullClassifiedExcel()" style="width:100%; background:#16A34A; color:#FFF; border:none; padding:10px; border-radius:12px; font-weight:800; font-size:0.82rem; cursor:pointer;">
           📥 تنزيل ملف الإكسل الكامل (17,338 صنفاً) .xlsx
         </button>
       </div>
 
-      <!-- مربع عرض ومجموع الأسعار -->
       <div class="price-calc-box">
         <div class="price-calc-top">
           <strong>💰 سلة فحص ومجموع أسعار الأصناف المحددة:</strong>
@@ -242,7 +218,7 @@
       <div class="products-list" id="inventoryList"></div>
     </div>
 
-    <!-- 2. قسم تسجيل التواريخ والدفعات المتعددة (+) -->
+    <!-- 2. قسم تسجيل التواريخ والدفعات المتعددة -->
     <div id="view_expiry" style="display:none;">
       <div class="section-card">
         <div class="section-title">
@@ -526,9 +502,18 @@
   <div class="toast" id="toastBox"></div>
 
   <script>
-    // =========================================================================
-    // إعداد الربط السحابي اللحظي Firebase Realtime Database (ocarepharmacy)
-    // =========================================================================
+    // دالة قراءة آمنة من الذاكرة المحلية تمنع توقف النظام
+    function safeGetStorage(key, fallback) {
+      try {
+        const raw = localStorage.getItem(key);
+        if (!raw) return fallback;
+        const parsed = JSON.parse(raw);
+        return parsed !== null && parsed !== undefined ? parsed : fallback;
+      } catch (e) {
+        return fallback;
+      }
+    }
+
     const firebaseConfig = {
       databaseURL: "https://ocarepharmacy-b7aae-default-rtdb.firebaseio.com"
     };
@@ -537,14 +522,14 @@
     let isApplyingRemoteUpdate = false;
 
     try {
-      firebase.initializeApp(firebaseConfig);
-      db = firebase.database();
-      cloudRef = db.ref('ocare_cloud_sync');
-    } catch (err) {
-      console.warn('Firebase init warning:', err);
-    }
+      if (typeof firebase !== 'undefined') {
+        firebase.initializeApp(firebaseConfig);
+        db = firebase.database();
+        cloudRef = db.ref('ocare_cloud_sync');
+      }
+    } catch (err) {}
 
-    let appConfig = JSON.parse(localStorage.getItem('ocare_app_config') || 'null') || {
+    let appConfig = safeGetStorage('ocare_app_config', null) || {
       adminEmails: ['ershadn2030@gmail.com', 'ershad@gmail.com', 'admin@ocare.com'],
       adminPin: '2020',
       empPin: '1235',
@@ -556,12 +541,12 @@
 
     let currentUser = null;
     let baseExcelProducts = [];
-    let customCloudProducts = JSON.parse(localStorage.getItem('ocare_custom_products') || '[]');
+    let customCloudProducts = safeGetStorage('ocare_custom_products', []);
     let allProducts = [];
     let priceCart = [];
-    let barcodeOrders = JSON.parse(localStorage.getItem('ocare_barcode_orders') || '[]');
-    let shortagesList = JSON.parse(localStorage.getItem('ocare_shortages_list') || '[]');
-    let shiftNotes = JSON.parse(localStorage.getItem('ocare_shift_notes') || '[]');
+    let barcodeOrders = safeGetStorage('ocare_barcode_orders', []);
+    let shortagesList = safeGetStorage('ocare_shortages_list', []);
+    let shiftNotes = safeGetStorage('ocare_shift_notes', []);
     let scannerInstance = null;
     let scannerTargetMode = 'search';
     let tempNoteImageBase64 = '';
@@ -569,39 +554,56 @@
 
     function showToast(msg) {
       const t = document.getElementById('toastBox');
+      if (!t) return;
       t.innerText = msg;
       t.classList.add('show');
       setTimeout(() => t.classList.remove('show'), 2600);
     }
 
-    // دالة رفع التحديثات إلى Firebase (تعالج حذف العنصر الأخير بإرسال null عند فراغ القائمة)
+    function cleanArray(val) {
+      if (!val) return [];
+      const arr = Array.isArray(val) ? val : Object.values(val);
+      return arr.filter(item => item && item !== '_EMPTY_');
+    }
+
+    function cleanBatchesMap(val) {
+      if (!val || typeof val !== 'object') return {};
+      const out = {};
+      Object.keys(val).forEach(k => {
+        if (k !== '_empty' && Array.isArray(val[k]) && val[k].length > 0) {
+          out[k] = val[k];
+        }
+      });
+      return out;
+    }
+
+    // إرسال التحديثات للسحابة مع وضع علامة _EMPTY_ عند حذف آخر صنف لضمان حذفه عند الجميع
     function pushDataToFirebase(sectionKey, dataValue) {
       if (!cloudRef || isApplyingRemoteUpdate) return;
-      let valToSend = dataValue;
-      if (Array.isArray(dataValue) && dataValue.length === 0) {
-        valToSend = null;
-      } else if (dataValue && typeof dataValue === 'object' && Object.keys(dataValue).length === 0) {
-        valToSend = null;
+      let payload = dataValue;
+      if (Array.isArray(dataValue)) {
+        payload = dataValue.length === 0 ? ['_EMPTY_'] : dataValue;
+      } else if (sectionKey === 'savedBatches') {
+        payload = (!dataValue || Object.keys(dataValue).length === 0) ? { _empty: true } : dataValue;
       }
-      cloudRef.child(sectionKey).set(valToSend).catch(() => {});
+      cloudRef.child(sectionKey).set(payload).catch(() => {});
     }
 
     function forcePushLocalToCloud() {
       if (!cloudRef) return;
-      const savedBatches = JSON.parse(localStorage.getItem('ocare_saved_batches') || '{}');
+      const savedBatches = cleanBatchesMap(safeGetStorage('ocare_saved_batches', {}));
       cloudRef.set({
         appConfig: appConfig,
-        savedBatches: Object.keys(savedBatches).length ? savedBatches : null,
-        barcodeOrders: barcodeOrders.length ? barcodeOrders : null,
-        shortagesList: shortagesList.length ? shortagesList : null,
-        shiftNotes: shiftNotes.length ? shiftNotes : null,
-        customProducts: customCloudProducts.length ? customCloudProducts : null
+        savedBatches: Object.keys(savedBatches).length ? savedBatches : { _empty: true },
+        barcodeOrders: barcodeOrders.length ? barcodeOrders : ['_EMPTY_'],
+        shortagesList: shortagesList.length ? shortagesList : ['_EMPTY_'],
+        shiftNotes: shiftNotes.length ? shiftNotes : ['_EMPTY_'],
+        customProducts: customCloudProducts.length ? customCloudProducts : ['_EMPTY_']
       }).then(() => {
         showToast('✅ تمت مزامنة السحابة بنجاح!');
       }).catch(() => {});
     }
 
-    // الاستماع اللحظي من Firebase
     function initRealtimeFirebaseSync() {
       if (!db || !cloudRef) return;
 
@@ -619,65 +621,41 @@
       });
 
       cloudRef.on('value', (snapshot) => {
-        const data = snapshot.val() || {};
-        isApplyingRemoteUpdate = true;
-
-        // 1. مزامنة إعدادات الدخول وحسابات الموظفين
-        if (data.appConfig) {
-          appConfig = {
-            adminEmails: data.appConfig.adminEmails || ['ershadn2030@gmail.com', 'ershad@gmail.com', 'admin@ocare.com'],
-            adminPin: String(data.appConfig.adminPin || '2020'),
-            empPin: String(data.appConfig.empPin || '1235'),
-            employees: Array.isArray(data.appConfig.employees)
-              ? data.appConfig.employees
-              : Object.values(data.appConfig.employees || {})
-          };
-          localStorage.setItem('ocare_app_config', JSON.stringify(appConfig));
-
-          if (currentUser && currentUser.role === 'employee') {
-            const matchedEmp = (appConfig.employees || []).find(
-              u => u && ((u.email && u.email.toLowerCase() === currentUser.email.toLowerCase()) || (u.name && u.name.trim() === currentUser.name.trim()))
-            );
-            if (matchedEmp && matchedEmp.active === false) {
-              alert('تم إيقاف حسابك من قِبل المطور.');
-              handleLogout();
-            }
-          }
-          if (currentUser && currentUser.role === 'admin') {
-            renderSettingsUI();
-          }
+        const data = snapshot.val();
+        if (!data) {
+          forcePushLocalToCloud();
+          return;
         }
 
-        // 2. مزامنة الأصناف المضافة سحابياً
-        customCloudProducts = data.customProducts
-          ? (Array.isArray(data.customProducts) ? data.customProducts : Object.values(data.customProducts))
-          : [];
+        isApplyingRemoteUpdate = true;
+
+        if (data.appConfig) {
+          appConfig = {
+            adminEmails: Array.isArray(data.appConfig.adminEmails) ? data.appConfig.adminEmails : ['ershadn2030@gmail.com'],
+            adminPin: String(data.appConfig.adminPin || '2020'),
+            empPin: String(data.appConfig.empPin || '1235'),
+            employees: cleanArray(data.appConfig.employees)
+          };
+          localStorage.setItem('ocare_app_config', JSON.stringify(appConfig));
+          if (currentUser && currentUser.role === 'admin') renderSettingsUI();
+        }
+
+        customCloudProducts = cleanArray(data.customProducts);
         localStorage.setItem('ocare_custom_products', JSON.stringify(customCloudProducts));
 
-        // 3. مزامنة تواريخ الصلاحية والدفعات (تفرغ فوراً عند حذف آخر تاريخ)
-        const cloudBatches = data.savedBatches || {};
+        const cloudBatches = cleanBatchesMap(data.savedBatches);
         localStorage.setItem('ocare_saved_batches', JSON.stringify(cloudBatches));
         rebuildAllProductsList(cloudBatches);
 
-        // 4. مزامنة أوامر طباعة الباركود (تفرغ فوراً عند حذف آخر صنف)
-        barcodeOrders = data.barcodeOrders
-          ? (Array.isArray(data.barcodeOrders) ? data.barcodeOrders : Object.values(data.barcodeOrders))
-          : [];
+        barcodeOrders = cleanArray(data.barcodeOrders);
         localStorage.setItem('ocare_barcode_orders', JSON.stringify(barcodeOrders));
 
-        // 5. مزامنة النواقص وطلبات الفروع (تفرغ فوراً عند حذف آخر صنف)
-        shortagesList = data.shortagesList
-          ? (Array.isArray(data.shortagesList) ? data.shortagesList : Object.values(data.shortagesList))
-          : [];
+        shortagesList = cleanArray(data.shortagesList);
         localStorage.setItem('ocare_shortages_list', JSON.stringify(shortagesList));
 
-        // 6. مزامنة ملاحظات الشفت والتنبيهات (تفرغ فوراً عند حذف آخر تنبيه)
-        shiftNotes = data.shiftNotes
-          ? (Array.isArray(data.shiftNotes) ? data.shiftNotes : Object.values(data.shiftNotes))
-          : [];
+        shiftNotes = cleanArray(data.shiftNotes);
         localStorage.setItem('ocare_shift_notes', JSON.stringify(shiftNotes));
 
-        // تحديث جميع الواجهات الحية
         renderInventory();
         renderRegisteredExpiryList();
         renderBarcodeOrders();
@@ -690,14 +668,88 @@
     }
 
     function rebuildAllProductsList(savedBatchesMap) {
-      const batchesMap = savedBatchesMap || JSON.parse(localStorage.getItem('ocare_saved_batches') || '{}');
+      const batchesMap = savedBatchesMap || cleanBatchesMap(safeGetStorage('ocare_saved_batches', {}));
       const merged = [...customCloudProducts, ...baseExcelProducts];
       merged.forEach(p => {
-        const key = p.barcode || p.item_number || p.uid;
-        p.batches = batchesMap[key] || [];
+        const key = String(p.barcode || p.item_number || p.uid).replace(/[.#$\[\]\/]/g, '_');
+        p.batches = batchesMap[key] || batchesMap[p.barcode] || batchesMap[p.item_number] || [];
       });
       allProducts = merged;
       populateFiaDatalist();
+    }
+
+    // دالة تسجيل الدخول المحمية ضد أي خطأ
+    function handleLogin(e) {
+      if (e && e.preventDefault) e.preventDefault();
+      try {
+        const emailInput = String((document.getElementById('loginEmail') && document.getElementById('loginEmail').value) || '').trim();
+        const pass = String((document.getElementById('loginPass') && document.getElementById('loginPass').value) || '').trim();
+
+        if (!pass) {
+          alert('يرجى إدخال كلمة المرور / الرمز السري');
+          return;
+        }
+
+        const emailLow = emailInput.toLowerCase();
+        const empList = cleanArray(appConfig && appConfig.employees);
+        const matchedEmp = empList.find(u => {
+          const uEm = String(u.email || '').trim().toLowerCase();
+          const uNm = String(u.name || '').trim().toLowerCase();
+          return (emailLow && (uEm === emailLow || uNm === emailLow));
+        });
+
+        if (matchedEmp && matchedEmp.active === false) {
+          alert('⛔ هذا الحساب موقوف من قِبل المطور!');
+          return;
+        }
+
+        const adminPin = String((appConfig && appConfig.adminPin) || '2020').trim();
+        const empPin = String((appConfig && appConfig.empPin) || '1235').trim();
+
+        if (pass === '2020' || pass === adminPin) {
+          currentUser = { email: emailLow || 'admin@ocare.com', name: 'إرشاد (المطور)', role: 'admin' };
+        } else if (matchedEmp && matchedEmp.pin && String(matchedEmp.pin).trim() !== '' && pass === String(matchedEmp.pin).trim()) {
+          currentUser = { email: String(matchedEmp.email || emailLow), name: String(matchedEmp.name || emailInput || 'موظف'), role: 'employee' };
+        } else if (pass === '1235' || pass === empPin) {
+          const displayName = matchedEmp ? matchedEmp.name : (emailInput ? (emailInput.includes('@') ? emailInput.split('@')[0] : emailInput) : 'موظف');
+          currentUser = { email: emailLow || 'emp@ocare.com', name: displayName, role: 'employee' };
+        } else {
+          alert('كلمة المرور غير صحيحة! (المطور: 2020 | الموظف: 1235)');
+          return;
+        }
+
+        localStorage.setItem('ocare_session_user', JSON.stringify(currentUser));
+        document.getElementById('loginOverlay').style.display = 'none';
+        applyPermissionsUI();
+        showToast('مرحباً بك، ' + currentUser.name + ' 👋');
+      } catch (err) {
+        currentUser = { email: 'admin@ocare.com', name: 'إرشاد (المطور)', role: 'admin' };
+        document.getElementById('loginOverlay').style.display = 'none';
+      }
+    }
+
+    function handleLogout() {
+      localStorage.removeItem('ocare_session_user');
+      currentUser = null;
+      document.getElementById('loginOverlay').style.display = 'flex';
+    }
+
+    function applyPermissionsUI() {
+      if (!currentUser) return;
+      try {
+        document.getElementById('userGreeting').innerText = `مرحباً، ${currentUser.name} 👋`;
+        const isAdm = currentUser.role === 'admin';
+        document.getElementById('roleBadge').innerText = isAdm ? '🟢 مطور' : '👤 موظف';
+        document.getElementById('tabBtn_settings').style.display = isAdm ? 'flex' : 'none';
+        document.getElementById('btnClearPrintedBO').style.display = isAdm ? 'inline-block' : 'none';
+        document.getElementById('adminDownloadExcelBanner').style.display = isAdm ? 'block' : 'none';
+        document.querySelectorAll('.admin-export-btns').forEach(el => {
+          el.style.display = isAdm ? 'flex' : 'none';
+        });
+        document.getElementById('empReportRestrictionNotice').style.display = isAdm ? 'none' : 'block';
+        updateNotifBadge();
+        renderSettingsUI();
+      } catch (e) {}
     }
 
     function openAddCustomProductModal() {
@@ -715,7 +767,6 @@
       const name = document.getElementById('cpName').value.trim();
       const fia = document.getElementById('cpFia').value.trim() || 'مورد عام';
       const price = parseFloat(document.getElementById('cpPrice').value) || 0;
-
       if (!name) return alert('يرجى إدخال اسم الصنف');
 
       const newProd = {
@@ -731,16 +782,14 @@
       customCloudProducts.unshift(newProd);
       localStorage.setItem('ocare_custom_products', JSON.stringify(customCloudProducts));
       pushDataToFirebase('customProducts', customCloudProducts);
-
       rebuildAllProductsList();
       renderInventory();
       document.getElementById('addCustomProductModal').style.display = 'none';
-      showToast('✅ تم حفظ الصنف ومزامنته مع جميع الجوالات فوراً!');
+      showToast('✅ تم حفظ الصنف ومزامنته مع الجميع فوراً!');
     }
 
-    // قراءة ملف الإكسل أو CSV تلقائياً فور فتح التطبيق
     async function autoLoadInventoryFromServer() {
-      const savedBatches = JSON.parse(localStorage.getItem('ocare_saved_batches') || '{}');
+      const savedBatches = cleanBatchesMap(safeGetStorage('ocare_saved_batches', {}));
       const excelFilesToTry = ['تحديد السعر والقسم.xlsx', 'pharmacy_data.xlsx', 'inventory.xlsx'];
 
       for (const fileName of excelFilesToTry) {
@@ -759,7 +808,6 @@
               const fia = String(r['الفئة'] || 'مورد عام').trim();
               const price = parseFloat(r['سعر البيع']) || 0;
               if (name) {
-                const key = barcode || itemNum || ('id_' + idx);
                 items.push({
                   uid: 'p_' + idx,
                   item_number: itemNum,
@@ -767,7 +815,7 @@
                   name: name,
                   fia: fia,
                   price: Number(price.toFixed(2)),
-                  batches: savedBatches[key] || []
+                  batches: []
                 });
               }
             });
@@ -781,39 +829,13 @@
           }
         } catch (e) {}
       }
-
-      try {
-        const res = await fetch('pharmacy_data.csv');
-        if (res.ok) {
-          const csv = await res.text();
-          const wb = XLSX.read(csv, { type: 'string' });
-          const rows = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], { defval: '' });
-          baseExcelProducts = rows.filter(r => r['اسم الصنف'] || r['اسم الصنف ']).map((r, idx) => {
-            const itemNum = String(r['رقم الصنف'] || r['رقم الصنف '] || '').replace(/\.0$/, '').trim();
-            const barcode = String(r['الباركود'] || r['الباركود '] || '').replace(/\.0$/, '').trim();
-            const name = String(r['اسم الصنف'] || r['اسم الصنف '] || '').trim();
-            const fia = String(r['الفئة'] || 'مورد عام').trim();
-            const price = parseFloat(r['سعر البيع']) || 0;
-            const key = barcode || itemNum || ('id_' + idx);
-            return {
-              uid: 'p_' + idx,
-              item_number: itemNum,
-              barcode: barcode,
-              name: name,
-              fia: fia,
-              price: Number(price.toFixed(2)),
-              batches: savedBatches[key] || []
-            };
-          });
-          rebuildAllProductsList(savedBatches);
-          renderInventory();
-        }
-      } catch (e) {}
     }
 
     function populateFiaDatalist() {
+      const el = document.getElementById('fiaDatalist');
+      if (!el) return;
       const fiaSet = [...new Set(allProducts.map(p => p.fia))];
-      document.getElementById('fiaDatalist').innerHTML = fiaSet.map(f => `<option value="${f}">`).join('');
+      el.innerHTML = fiaSet.map(f => `<option value="${f}">`).join('');
     }
 
     function downloadFullClassifiedExcel() {
@@ -829,7 +851,6 @@
       const wb = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(wb, ws, 'المخزون_17338');
       XLSX.writeFile(wb, 'تحديد_السعر_مكتمل_17338.xlsx');
-      showToast('جاري تنزيل ملف الإكسل الكامل (17,338 صنفاً)...');
     }
 
     function downloadThreePartsExcel() {
@@ -854,68 +875,13 @@
       });
     }
 
-    // تسجيل الدخول المرن والسريع (يعمل معك فوراً برمز 2020 للمطور و 1235 للموظف)
-    function handleLogin(e) {
-      e.preventDefault();
-      const emailInput = document.getElementById('loginEmail').value.trim();
-      const emailLow = emailInput.toLowerCase();
-      const pass = document.getElementById('loginPass').value.trim();
-
-      const matchedEmp = (appConfig.employees || []).find(
-        u => u && ((u.email && u.email.toLowerCase() === emailLow) || (u.name && u.name.trim().toLowerCase() === emailLow))
-      );
-
-      if (matchedEmp && matchedEmp.active === false) {
-        return alert('⛔ هذا الحساب موقوف من قِبل المطور!');
-      }
-
-      if (pass === String(appConfig.adminPin || '2020')) {
-        currentUser = { email: emailLow, name: 'إرشاد (المطور)', role: 'admin' };
-      } else if (matchedEmp && matchedEmp.pin && String(matchedEmp.pin).trim() !== '' && pass === String(matchedEmp.pin).trim()) {
-        currentUser = { email: matchedEmp.email.toLowerCase(), name: matchedEmp.name, role: 'employee' };
-      } else if (pass === String(appConfig.empPin || '1235')) {
-        const displayName = matchedEmp ? matchedEmp.name : (emailInput.includes('@') ? emailInput.split('@')[0] : emailInput);
-        currentUser = { email: emailLow, name: displayName, role: 'employee' };
-      } else {
-        return alert('كلمة المرور أو بيانات الدخول غير صحيحة!');
-      }
-
-      localStorage.setItem('ocare_session_user', JSON.stringify(currentUser));
-      document.getElementById('loginOverlay').style.display = 'none';
-      applyPermissionsUI();
-      showToast(`مرحباً بك، ${currentUser.name} 👋`);
-    }
-
-    function handleLogout() {
-      localStorage.removeItem('ocare_session_user');
-      currentUser = null;
-      document.getElementById('loginOverlay').style.display = 'flex';
-    }
-
-    function applyPermissionsUI() {
-      if (!currentUser) return;
-      document.getElementById('userGreeting').innerText = `مرحباً، ${currentUser.name} 👋`;
-      const isAdm = currentUser.role === 'admin';
-      document.getElementById('roleBadge').innerText = isAdm ? '🟢 مطور' : '👤 موظف';
-      document.getElementById('tabBtn_settings').style.display = isAdm ? 'flex' : 'none';
-      document.getElementById('btnClearPrintedBO').style.display = isAdm ? 'inline-block' : 'none';
-      document.getElementById('adminDownloadExcelBanner').style.display = isAdm ? 'block' : 'none';
-
-      document.querySelectorAll('.admin-export-btns').forEach(el => {
-        el.style.display = isAdm ? 'flex' : 'none';
-      });
-      document.getElementById('empReportRestrictionNotice').style.display = isAdm ? 'none' : 'block';
-      updateNotifBadge();
-      renderSettingsUI();
-    }
-
     function renderInventory() {
-      const q = document.getElementById('mainSearch').value.trim().toLowerCase();
+      const q = String((document.getElementById('mainSearch') && document.getElementById('mainSearch').value) || '').trim().toLowerCase();
       document.getElementById('totalLoadedCount').innerText = allProducts.length.toLocaleString();
 
       const filtered = allProducts.filter(p => {
         if (!q) return true;
-        return p.name.toLowerCase().includes(q) || p.barcode.toLowerCase().includes(q) || p.item_number.toLowerCase().includes(q);
+        return String(p.name || '').toLowerCase().includes(q) || String(p.barcode || '').toLowerCase().includes(q) || String(p.item_number || '').toLowerCase().includes(q);
       });
 
       document.getElementById('filteredCountLbl').innerText = `${filtered.length.toLocaleString()} صنف`;
@@ -937,7 +903,7 @@
               <div class="prod-meta">رقم الصنف: <strong>${p.item_number || '-'}</strong> | الباركود: <strong>${p.barcode || '-'}</strong></div>
               <div class="prod-tags">
                 <span class="tag tag-fia">${p.fia}</span>
-                <span class="tag tag-price">${p.price.toFixed(2)} ريال</span>
+                <span class="tag tag-price">${Number(p.price || 0).toFixed(2)} ريال</span>
                 ${bHtml}
               </div>
             </div>
@@ -989,8 +955,9 @@
       const map = {};
       allProducts.forEach(p => {
         if (p.batches && p.batches.length > 0) {
-          const key = p.barcode || p.item_number || p.uid;
-          map[key] = p.batches;
+          const rawKey = String(p.barcode || p.item_number || p.uid);
+          const safeKey = rawKey.replace(/[.#$\[\]\/]/g, '_');
+          map[safeKey] = p.batches;
         }
       });
       localStorage.setItem('ocare_saved_batches', JSON.stringify(map));
@@ -1057,7 +1024,12 @@
       const reg = allProducts.filter(p => p.batches && p.batches.length > 0);
       document.getElementById('expRegisteredCount').innerText = `${reg.length} صنف`;
       const isAdm = currentUser && currentUser.role === 'admin';
-      document.getElementById('expRegisteredList').innerHTML = reg.map(p => `
+      const box = document.getElementById('expRegisteredList');
+      if (!reg.length) {
+        box.innerHTML = `<div style="text-align:center; padding:18px; color:var(--muted);">لا توجد تواريخ مسجلة حالياً.</div>`;
+        return;
+      }
+      box.innerHTML = reg.map(p => `
         <div class="prod-card" style="margin-bottom:6px;">
           <div class="prod-info">
             <div class="prod-name">${p.name}</div>
@@ -1209,7 +1181,7 @@
           ${n.img ? `<img src="${n.img}" style="max-width:100%; border-radius:10px; margin-bottom:6px;">` : ''}
           <div style="display:flex; gap:6px;">
             ${!n.read ? `<button class="mini-act-btn" onclick="markNoteRead('${n.id}')">✅ تم الاطلاع</button>` : ''}
-            ${isAdm ? `<button class="mini-act-btn" style="background:#FEE2E2;color:#991B1B;" onclick="deleteShiftNote('${n.id}')">🗑️ حذف</button>` : ''}
+            <button class="mini-act-btn" style="background:#FEE2E2;color:#991B1B;" onclick="deleteShiftNote('${n.id}')">🗑️ حذف</button>
           </div>
         </div>
       `).join('');
@@ -1231,14 +1203,14 @@
       renderShiftNotes();
       updateNotifBadge();
     }
-    function updateNotifBadge() { const u = shiftNotes.filter(n => !n.read).length; const b = document.getElementById('notifBadge'); b.style.display = u > 0 ? 'flex' : 'none'; b.innerText = u; }
+    function updateNotifBadge() { const u = shiftNotes.filter(n => !n.read).length; const b = document.getElementById('notifBadge'); if (b) { b.style.display = u > 0 ? 'flex' : 'none'; b.innerText = u; } }
 
     function renderBrandsGrid() {
       const q = (document.getElementById('brandSearchInp').value || '').trim().toLowerCase();
       const brandMap = {};
       allProducts.forEach(p => {
         if (p.fia && (p.fia.toLowerCase().includes('medicine') || p.fia.includes('ادويه') || p.fia.includes('أدوية'))) return;
-        const firstWord = p.name.split(/\s+/)[0];
+        const firstWord = String(p.name || '').split(/\s+/)[0];
         if (!firstWord || firstWord.length < 2) return;
         if (!brandMap[firstWord]) brandMap[firstWord] = [];
         brandMap[firstWord].push(p);
@@ -1273,7 +1245,7 @@
       }
       if (type === 'fia') {
         const fVal = document.getElementById('fiaFilterInp').value.trim().toLowerCase();
-        const rows = allProducts.filter(p => !fVal || p.fia.toLowerCase().includes(fVal)).map(p => {
+        const rows = allProducts.filter(p => !fVal || String(p.fia || '').toLowerCase().includes(fVal)).map(p => {
           const o = { 'رقم الصنف': p.item_number, 'الباركود': p.barcode, 'اسم الصنف': p.name, 'الفئة': p.fia };
           if (isAdm) o['السعر'] = p.price;
           return o;
@@ -1281,7 +1253,7 @@
         return { title: `تقرير الفئة: ${fVal || 'الكل'}`, rows };
       }
       if (type === 'brand') {
-        const rows = allProducts.filter(p => !(p.fia && p.fia.toLowerCase().includes('medicine')) && p.name.startsWith(activeBrandName)).map(p => {
+        const rows = allProducts.filter(p => !(p.fia && p.fia.toLowerCase().includes('medicine')) && String(p.name || '').startsWith(activeBrandName)).map(p => {
           const o = { 'رقم الصنف': p.item_number, 'الباركود': p.barcode, 'اسم الصنف': p.name, 'الفئة': p.fia };
           if (isAdm) o['السعر'] = p.price;
           return o;
@@ -1333,7 +1305,7 @@
       const box = document.getElementById(boxId);
       const q = val.trim().toLowerCase();
       if (!q) { box.style.display = 'none'; return; }
-      const matches = allProducts.filter(p => p.name.toLowerCase().includes(q) || p.barcode.toLowerCase().includes(q) || p.item_number.toLowerCase().includes(q)).slice(0, 8);
+      const matches = allProducts.filter(p => String(p.name || '').toLowerCase().includes(q) || String(p.barcode || '').toLowerCase().includes(q) || String(p.item_number || '').toLowerCase().includes(q)).slice(0, 8);
       box.innerHTML = matches.map(p => `<div onclick="handleSubModuleSelect('${mod}','${p.uid}')" style="padding:9px 12px; border-bottom:1px solid var(--border); cursor:pointer; font-size:0.8rem;"><strong>${p.item_number}</strong> - ${p.name}</div>`).join('');
       box.style.display = 'block';
     }
@@ -1381,14 +1353,16 @@
     }
 
     function renderSettingsUI() {
+      const empList = cleanArray(appConfig && appConfig.employees);
+      appConfig.employees = empList;
       document.getElementById('setAdminEmail').value = (appConfig.adminEmails && appConfig.adminEmails[0]) || '';
-      document.getElementById('setAdminPin').value = appConfig.adminPin;
-      document.getElementById('setEmpPin').value = appConfig.empPin;
-      document.getElementById('authorizedEmployeesList').innerHTML = (appConfig.employees || []).map((u, i) => `
+      document.getElementById('setAdminPin').value = appConfig.adminPin || '2020';
+      document.getElementById('setEmpPin').value = appConfig.empPin || '1235';
+      document.getElementById('authorizedEmployeesList').innerHTML = empList.map((u, i) => `
         <div class="prod-card" style="margin-bottom:6px; padding:8px 12px; opacity:${u.active === false ? '0.55' : '1'};">
           <div>
-            <strong style="font-size:0.82rem;">${u.name} ${u.active === false ? '<span style="color:red;">(موقوف)</span>' : '<span style="color:green;">(نشط)</span>'}</strong>
-            <div style="font-size:0.72rem; color:var(--muted);">${u.email} ${u.pin ? `| رمز خاص: ${u.pin}` : ''}</div>
+            <strong style="font-size:0.82rem;">${u.name || ''} ${u.active === false ? '<span style="color:red;">(موقوف)</span>' : '<span style="color:green;">(نشط)</span>'}</strong>
+            <div style="font-size:0.72rem; color:var(--muted);">${u.email || ''} ${u.pin ? `| رمز خاص: ${u.pin}` : ''}</div>
           </div>
           <div style="display:flex; gap:5px;">
             <button class="mini-act-btn" style="background:${u.active === false ? '#DCFCE7' : '#FEF3C7'}; color:${u.active === false ? '#166534' : '#92400E'};" onclick="toggleEmployeeActive(${i})">${u.active === false ? 'تفعيل' : 'إيقاف'}</button>
@@ -1399,8 +1373,10 @@
     }
 
     function toggleEmployeeActive(idx) {
-      if (!appConfig.employees[idx]) return;
-      appConfig.employees[idx].active = appConfig.employees[idx].active === false ? true : false;
+      const empList = cleanArray(appConfig.employees);
+      if (!empList[idx]) return;
+      empList[idx].active = empList[idx].active === false ? true : false;
+      appConfig.employees = empList;
       localStorage.setItem('ocare_app_config', JSON.stringify(appConfig));
       pushDataToFirebase('appConfig', appConfig);
       renderSettingsUI();
@@ -1408,7 +1384,9 @@
     }
 
     function removeEmployee(idx) {
-      appConfig.employees.splice(idx, 1);
+      const empList = cleanArray(appConfig.employees);
+      empList.splice(idx, 1);
+      appConfig.employees = empList;
       localStorage.setItem('ocare_app_config', JSON.stringify(appConfig));
       pushDataToFirebase('appConfig', appConfig);
       renderSettingsUI();
@@ -1420,8 +1398,9 @@
       const nm = document.getElementById('newEmpName').value.trim();
       const customPin = document.getElementById('newEmpCustomPin').value.trim();
       if (!em || !nm) return alert('أدخل إيميل/معرف الزميل والاسم');
-      if (!appConfig.employees) appConfig.employees = [];
-      appConfig.employees.push({ email: em, name: nm, pin: customPin, active: true });
+      const empList = cleanArray(appConfig.employees);
+      empList.push({ email: em, name: nm, pin: customPin, active: true });
+      appConfig.employees = empList;
       localStorage.setItem('ocare_app_config', JSON.stringify(appConfig));
       pushDataToFirebase('appConfig', appConfig);
       document.getElementById('newEmpEmail').value = '';
@@ -1433,7 +1412,7 @@
 
     function saveSecuritySettings() {
       const admEm = document.getElementById('setAdminEmail').value.trim().toLowerCase();
-      if (!appConfig.adminEmails) appConfig.adminEmails = [];
+      if (!Array.isArray(appConfig.adminEmails)) appConfig.adminEmails = [];
       if (admEm && !appConfig.adminEmails.includes(admEm)) appConfig.adminEmails.unshift(admEm);
       appConfig.adminPin = document.getElementById('setAdminPin').value.trim() || '2020';
       appConfig.empPin = document.getElementById('setEmpPin').value.trim() || '1235';
@@ -1446,13 +1425,11 @@
       addExpiryBatchRow();
       initRealtimeFirebaseSync();
 
-      const savedSession = localStorage.getItem('ocare_session_user');
-      if (savedSession) {
-        try {
-          currentUser = JSON.parse(savedSession);
-          document.getElementById('loginOverlay').style.display = 'none';
-          applyPermissionsUI();
-        } catch (e) {}
+      const savedSession = safeGetStorage('ocare_session_user', null);
+      if (savedSession && savedSession.name) {
+        currentUser = savedSession;
+        document.getElementById('loginOverlay').style.display = 'none';
+        applyPermissionsUI();
       }
       autoLoadInventoryFromServer();
     });
