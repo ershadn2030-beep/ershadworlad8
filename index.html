@@ -10,6 +10,9 @@
   <title>أوكير O CARE - منظومة إدارة الصيدلية</title>
   <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
   <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
+  <!-- مكتبات المزامنة السحابية اللحظية Firebase -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
   <style>
     :root {
       --navy: #0B1957;
@@ -55,6 +58,8 @@
     .notif-dot { position: absolute; top: -3px; right: -3px; background: var(--danger); color: #FFF; font-size: 0.65rem; font-weight: 900; width: 18px; height: 18px; border-radius: 50%; display: none; align-items: center; justify-content: center; border: 2px solid var(--navy); }
     .role-pill { font-size: 0.7rem; padding: 4px 8px; border-radius: 12px; background: rgba(255,255,255,0.2); font-weight: 700; }
     .btn-exit { background: rgba(239,68,68,0.3); color: #FFF; border: 1px solid rgba(255,255,255,0.25); padding: 5px 9px; border-radius: 10px; font-size: 0.7rem; font-weight: 700; cursor: pointer; }
+    .live-sync-pill { display: inline-flex; align-items: center; gap: 4px; font-size: 0.66rem; background: rgba(16,185,129,0.22); border: 1px solid rgba(16,185,129,0.5); color: #A7F3D0; padding: 3px 7px; border-radius: 10px; font-weight: 700; }
+    .live-dot { width: 7px; height: 7px; border-radius: 50%; background: #10B981; box-shadow: 0 0 6px #10B981; }
 
     /* البحث */
     .search-bar { position: relative; display: flex; align-items: center; }
@@ -116,7 +121,7 @@
     .nav-btn span.ico { font-size: 1.2rem; }
     .nav-scan-fab { position: relative; top: -14px; width: 52px; height: 52px; border-radius: 50%; background: linear-gradient(135deg, var(--navy), var(--primary)); color: #FFF; border: 4px solid var(--bg); font-size: 1.45rem; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 8px 18px rgba(13,148,136,0.35); }
 
-    #previewModal, #scannerModal { position: fixed; inset: 0; background: rgba(15,23,42,0.75); z-index: 9999; display: none; flex-direction: column; align-items: center; justify-content: center; padding: 14px; }
+    #previewModal, #scannerModal, #addCustomProductModal { position: fixed; inset: 0; background: rgba(15,23,42,0.75); z-index: 9999; display: none; flex-direction: column; align-items: center; justify-content: center; padding: 14px; }
     .preview-box { background: #FFF; width: 100%; max-width: 480px; max-height: 88vh; border-radius: 22px; display: flex; flex-direction: column; overflow: hidden; }
     .preview-head { background: var(--navy); color: #FFF; padding: 14px 16px; display: flex; justify-content: space-between; align-items: center; }
     .preview-body { padding: 14px; overflow-y: auto; flex: 1; }
@@ -173,6 +178,10 @@
           </div>
         </div>
         <div class="header-actions">
+          <span class="live-sync-pill" id="liveSyncStatus" title="حالة المزامنة السحابية المباشرة">
+            <span class="live-dot" id="liveSyncDot"></span>
+            <span id="liveSyncText">متزامن</span>
+          </span>
           <button class="icon-badge-btn" id="pwaInstallBtn" style="display:none;" onclick="installPWA()" title="تثبيت التطبيق">📲</button>
           <button class="icon-badge-btn" onclick="switchTab('notes')" title="ملاحظات الشفت والتنبيهات">
             🔔<span class="notif-dot" id="notifBadge">0</span>
@@ -200,7 +209,7 @@
       <button class="mod-btn" id="tabBtn_settings" style="display:none;" onclick="switchTab('settings')">⚙️ الإعدادات</button>
     </div>
 
-    <!-- 1. قسم المخزون العام + حاسبة الأسعار (بدون شريط الأقسام) -->
+    <!-- 1. قسم المخزون العام + حاسبة الأسعار -->
     <div id="view_inventory">
       <div id="adminDownloadExcelBanner" style="display:none; margin:8px 12px 2px;">
         <button onclick="downloadFullClassifiedExcel()" style="width:100%; background:#16A34A; color:#FFF; border:none; padding:10px; border-radius:12px; font-weight:800; font-size:0.82rem; cursor:pointer; box-shadow:0 4px 10px rgba(22,163,74,0.2);">
@@ -222,9 +231,12 @@
       </div>
 
       <div class="section-card" style="padding:10px 14px; margin-bottom:4px;">
-        <div style="display:flex; justify-content:space-between; align-items:center;">
-          <strong style="font-size:0.84rem;">جميع الأصناف في المخزون (<span id="totalLoadedCount">0</span>)</strong>
-          <span style="font-size:0.75rem; color:var(--muted);" id="filteredCountLbl">جاري التحميل التلقائي...</span>
+        <div style="display:flex; justify-content:space-between; align-items:center; gap:8px;">
+          <div>
+            <strong style="font-size:0.84rem;">جميع الأصناف في المخزون (<span id="totalLoadedCount">0</span>)</strong>
+            <div style="font-size:0.72rem; color:var(--muted);" id="filteredCountLbl">جاري التحميل التلقائي...</div>
+          </div>
+          <button class="mini-act-btn" style="background:var(--navy); color:#fff; padding:7px 10px;" onclick="openAddCustomProductModal()">➕ إضافة صنف جديد</button>
         </div>
       </div>
       <div class="products-list" id="inventoryList"></div>
@@ -250,7 +262,7 @@
         <label style="font-size:0.75rem; font-weight:700; color:var(--muted); display:block; margin-bottom:6px;">الدفعات (تاريخ الصلاحية + الكمية):</label>
         <div id="expiryBatchesBox"></div>
         <button type="button" class="mini-act-btn" style="width:100%; padding:9px; margin-bottom:10px; border:1.5px dashed var(--primary); background:#F0FDFA; color:var(--primary-dark);" onclick="addExpiryBatchRow()">➕ إضافة تاريخ وكمية أخرى لنفس الصنف</button>
-        <button class="btn-main" onclick="saveItemExpiryBatches()">💾 حفظ التواريخ والكميات</button>
+        <button class="btn-main" onclick="saveItemExpiryBatches()">💾 حفظ التواريخ والكميات (مزامنة فورية)</button>
       </div>
       <div class="section-card">
         <div class="section-title"><span>الأصناف المسجلة تواريخها مؤخراً</span><span id="expRegisteredCount">0</span></div>
@@ -328,7 +340,7 @@
           <input type="file" id="noteImgInp" accept="image/*" capture="environment" onchange="previewNoteImage(event)">
           <img id="noteImgPreview" style="max-width:100%; max-height:140px; border-radius:10px; margin-top:6px; display:none;">
         </div>
-        <button class="btn-main" onclick="addShiftNote()">🚀 إرسال الملاحظة وتنبيه الزملاء</button>
+        <button class="btn-main" onclick="addShiftNote()">🚀 إرسال الملاحظة وتنبيه الزملاء فوراً</button>
       </div>
       <div class="section-card">
         <div class="section-title"><span>سجل ملاحظات الشفتات</span></div>
@@ -411,15 +423,16 @@
       </div>
 
       <div class="section-card">
-        <div class="section-title"><span>👥 إدارة حسابات الزملاء ومزامنة جوالاتهم</span></div>
-        <p style="font-size:0.74rem; color:var(--muted); margin-bottom:8px;">أضف إيميل واسم الزميل، ثم اضغط زر "نسخ رابط المزامنة" وأرسله بالواتساب ليتفعل اسمه في جواله فوراً (كما يمكن لأي زميل الدخول مباشرة برمز 1235):</p>
-        <div style="display:grid; grid-template-columns: 1.3fr 1fr auto; gap:6px; margin-bottom:10px;">
-          <input type="text" id="newEmpEmail" placeholder="إيميل أو معرف الزميل" style="padding:8px; border-radius:8px; border:1px solid var(--border); font-size:0.8rem;">
-          <input type="text" id="newEmpName" placeholder="الاسم (مثل: د. أحمد)" style="padding:8px; border-radius:8px; border:1px solid var(--border); font-size:0.8rem;">
+        <div class="section-title"><span>👥 إدارة حسابات الزملاء (مزامنة سحابية فورية Firebase)</span></div>
+        <p style="font-size:0.74rem; color:var(--muted); margin-bottom:8px;">أي موظف تضيفه أو توقف حسابه أو تحذفه هنا (أو من داخل Firebase) يتفعل أو يُلغى فوراً على جميع الجوالات في نفس الثانية:</p>
+        <div style="display:grid; grid-template-columns: 1.2fr 1fr 0.8fr auto; gap:6px; margin-bottom:10px;">
+          <input type="text" id="newEmpEmail" placeholder="إيميل أو معرف الزميل" style="padding:8px; border-radius:8px; border:1px solid var(--border); font-size:0.78rem;">
+          <input type="text" id="newEmpName" placeholder="الاسم (مثل: د. أحمد)" style="padding:8px; border-radius:8px; border:1px solid var(--border); font-size:0.78rem;">
+          <input type="text" id="newEmpCustomPin" placeholder="رمز خاص (اختياري)" style="padding:8px; border-radius:8px; border:1px solid var(--border); font-size:0.78rem;">
           <button class="mini-act-btn" style="background:var(--navy); color:#fff;" onclick="addAuthorizedEmployee()">➕ إضافة</button>
         </div>
         <div id="authorizedEmployeesList"></div>
-        <button class="btn-main" style="background:#0D9488; margin-top:10px;" onclick="copyEmployeeSyncLink()">📲 نسخ رابط مزامنة الحسابات لجوالات الزملاء</button>
+        <button class="btn-main" style="background:#0D9488; margin-top:10px;" onclick="copyEmployeeSyncLink()">📲 نسخ رابط الموقع لإرساله للزملاء</button>
       </div>
 
       <div class="section-card">
@@ -434,11 +447,11 @@
             <input type="text" id="setAdminPin">
           </div>
           <div class="form-group">
-            <label>رمز دخول الموظفين (1235):</label>
+            <label>رمز دخول الموظفين العام (1235):</label>
             <input type="text" id="setEmpPin">
           </div>
         </div>
-        <button class="btn-main" onclick="saveSecuritySettings()">💾 حفظ إعدادات الدخول</button>
+        <button class="btn-main" onclick="saveSecuritySettings()">💾 حفظ ومزامنة إعدادات الدخول</button>
       </div>
     </div>
 
@@ -453,6 +466,39 @@
       <button class="nav-btn" onclick="switchTab('barcodeOrder')"><span class="ico">🏷️</span><span>الباركود</span></button>
       <button class="nav-btn" onclick="switchTab('reports')"><span class="ico">📊</span><span>التقارير</span></button>
     </nav>
+  </div>
+
+  <!-- نافذة إضافة صنف جديد للسحابة -->
+  <div id="addCustomProductModal">
+    <div class="preview-box">
+      <div class="preview-head">
+        <strong>➕ إضافة صنف جديد للمخزون السحابي</strong>
+        <button onclick="document.getElementById('addCustomProductModal').style.display='none'" style="background:transparent; border:none; color:#fff; font-size:1.2rem; cursor:pointer;">✕</button>
+      </div>
+      <div class="preview-body">
+        <div class="form-group">
+          <label>رقم الصنف *</label>
+          <input type="text" id="cpItemNum" placeholder="مثال: 10945">
+        </div>
+        <div class="form-group">
+          <label>الباركود *</label>
+          <input type="text" id="cpBarcode" placeholder="امسح أو اكتب الباركود">
+        </div>
+        <div class="form-group">
+          <label>اسم الصنف *</label>
+          <input type="text" id="cpName" placeholder="اسم الصنف كاملاً">
+        </div>
+        <div class="form-group">
+          <label>الفئة / المورد</label>
+          <input type="text" id="cpFia" list="fiaDatalist" placeholder="مثال: مورد عام">
+        </div>
+        <div class="form-group">
+          <label>سعر البيع (ريال) *</label>
+          <input type="number" step="0.01" id="cpPrice" placeholder="0.00">
+        </div>
+        <button class="btn-main" onclick="saveNewCloudProduct()">💾 حفظ الصنف ومزامنته مع الجميع فوراً</button>
+      </div>
+    </div>
   </div>
 
   <!-- نافذة المعاينة المباشرة -->
@@ -480,17 +526,37 @@
   <div class="toast" id="toastBox"></div>
 
   <script>
+    // =========================================================================
+    // إعداد الربط السحابي اللحظي Firebase Realtime Database (ocarepharmacy)
+    // =========================================================================
+    const firebaseConfig = {
+      databaseURL: "https://ocarepharmacy-b7aae-default-rtdb.firebaseio.com"
+    };
+    let db = null;
+    let cloudRef = null;
+    let isApplyingRemoteUpdate = false;
+
+    try {
+      firebase.initializeApp(firebaseConfig);
+      db = firebase.database();
+      cloudRef = db.ref('ocare_cloud_sync');
+    } catch (err) {
+      console.warn('Firebase init warning:', err);
+    }
+
     let appConfig = JSON.parse(localStorage.getItem('ocare_app_config') || 'null') || {
       adminEmails: ['ershadn2030@gmail.com', 'ershad@gmail.com', 'admin@ocare.com'],
       adminPin: '2020',
       empPin: '1235',
       employees: [
-        { email: 'emp1@ocare.com', name: 'موظف الفترة الصباحية', active: true },
-        { email: 'emp2@ocare.com', name: 'موظف الفترة المسائية', active: true }
+        { email: 'emp1@ocare.com', name: 'موظف الفترة الصباحية', pin: '', active: true },
+        { email: 'emp2@ocare.com', name: 'موظف الفترة المسائية', pin: '', active: true }
       ]
     };
 
     let currentUser = null;
+    let baseExcelProducts = [];
+    let customCloudProducts = JSON.parse(localStorage.getItem('ocare_custom_products') || '[]');
     let allProducts = [];
     let priceCart = [];
     let barcodeOrders = JSON.parse(localStorage.getItem('ocare_barcode_orders') || '[]');
@@ -508,6 +574,163 @@
       setTimeout(() => t.classList.remove('show'), 2600);
     }
 
+    // دالة رفع التحديثات إلى Firebase فوراً
+    function pushDataToFirebase(sectionKey, dataValue) {
+      if (!cloudRef || isApplyingRemoteUpdate) return;
+      cloudRef.child(sectionKey).set(dataValue).catch(() => {});
+    }
+
+    // الاستماع اللحظي من Firebase لتحديث جوال المطور وجوالات الموظفين في نفس الثانية
+    function initRealtimeFirebaseSync() {
+      if (!db || !cloudRef) return;
+
+      db.ref('.info/connected').on('value', (snap) => {
+        const dot = document.getElementById('liveSyncDot');
+        const txt = document.getElementById('liveSyncText');
+        if (!dot || !txt) return;
+        if (snap.val() === true) {
+          dot.style.background = '#10B981';
+          txt.innerText = 'متزامن لحظياً';
+        } else {
+          dot.style.background = '#F59E0B';
+          txt.innerText = 'وضع محلي';
+        }
+      });
+
+      cloudRef.on('value', (snapshot) => {
+        const data = snapshot.val();
+        if (!data) {
+          // أول تشغيل: نرفع البيانات الحالية لقاعدة البيانات حتى تظهر في لوحة Firebase
+          cloudRef.set({
+            appConfig: appConfig,
+            savedBatches: JSON.parse(localStorage.getItem('ocare_saved_batches') || '{}'),
+            barcodeOrders: barcodeOrders,
+            shortagesList: shortagesList,
+            shiftNotes: shiftNotes,
+            customProducts: customCloudProducts
+          });
+          return;
+        }
+
+        isApplyingRemoteUpdate = true;
+
+        // 1. مزامنة إعدادات الدخول وحسابات الموظفين (مع الطرد الفوري لمن يُلغى حسابه)
+        if (data.appConfig) {
+          appConfig = {
+            adminEmails: data.appConfig.adminEmails || ['ershadn2030@gmail.com', 'ershad@gmail.com', 'admin@ocare.com'],
+            adminPin: String(data.appConfig.adminPin || '2020'),
+            empPin: String(data.appConfig.empPin || '1235'),
+            employees: Array.isArray(data.appConfig.employees)
+              ? data.appConfig.employees
+              : Object.values(data.appConfig.employees || {})
+          };
+          localStorage.setItem('ocare_app_config', JSON.stringify(appConfig));
+
+          // التحقق الفوري إذا تم إيقاف أو حذف الموظف الحالي من Firebase
+          if (currentUser && currentUser.role === 'employee') {
+            const matchedEmp = appConfig.employees.find(u => u && u.email && u.email.toLowerCase() === currentUser.email.toLowerCase());
+            if (matchedEmp && matchedEmp.active === false) {
+              alert('تم إيقاف حسابك من قِبل المطور.');
+              handleLogout();
+            }
+          }
+          if (currentUser && currentUser.role === 'admin') {
+            renderSettingsUI();
+          }
+        }
+
+        // 2. مزامنة الأصناف المضافة سحابياً
+        customCloudProducts = data.customProducts
+          ? (Array.isArray(data.customProducts) ? data.customProducts : Object.values(data.customProducts))
+          : [];
+        localStorage.setItem('ocare_custom_products', JSON.stringify(customCloudProducts));
+
+        // 3. مزامنة تواريخ الصلاحية والدفعات
+        const cloudBatches = data.savedBatches || {};
+        localStorage.setItem('ocare_saved_batches', JSON.stringify(cloudBatches));
+
+        // دمج الأصناف وتواريخها
+        rebuildAllProductsList(cloudBatches);
+
+        // 4. مزامنة أوامر طباعة الباركود
+        barcodeOrders = data.barcodeOrders
+          ? (Array.isArray(data.barcodeOrders) ? data.barcodeOrders : Object.values(data.barcodeOrders))
+          : [];
+        localStorage.setItem('ocare_barcode_orders', JSON.stringify(barcodeOrders));
+
+        // 5. مزامنة النواقص وطلبات الفروع
+        shortagesList = data.shortagesList
+          ? (Array.isArray(data.shortagesList) ? data.shortagesList : Object.values(data.shortagesList))
+          : [];
+        localStorage.setItem('ocare_shortages_list', JSON.stringify(shortagesList));
+
+        // 6. مزامنة ملاحظات الشفت والتنبيهات
+        shiftNotes = data.shiftNotes
+          ? (Array.isArray(data.shiftNotes) ? data.shiftNotes : Object.values(data.shiftNotes))
+          : [];
+        localStorage.setItem('ocare_shift_notes', JSON.stringify(shiftNotes));
+
+        // تحديث جميع الواجهات الحية
+        renderInventory();
+        renderRegisteredExpiryList();
+        renderBarcodeOrders();
+        renderShortages();
+        renderShiftNotes();
+        updateNotifBadge();
+
+        isApplyingRemoteUpdate = false;
+      });
+    }
+
+    function rebuildAllProductsList(savedBatchesMap) {
+      const batchesMap = savedBatchesMap || JSON.parse(localStorage.getItem('ocare_saved_batches') || '{}');
+      const merged = [...customCloudProducts, ...baseExcelProducts];
+      merged.forEach(p => {
+        const key = p.barcode || p.item_number || p.uid;
+        p.batches = batchesMap[key] || [];
+      });
+      allProducts = merged;
+      populateFiaDatalist();
+    }
+
+    function openAddCustomProductModal() {
+      document.getElementById('cpItemNum').value = '';
+      document.getElementById('cpBarcode').value = '';
+      document.getElementById('cpName').value = '';
+      document.getElementById('cpFia').value = '';
+      document.getElementById('cpPrice').value = '';
+      document.getElementById('addCustomProductModal').style.display = 'flex';
+    }
+
+    function saveNewCloudProduct() {
+      const itemNum = document.getElementById('cpItemNum').value.trim();
+      const barcode = document.getElementById('cpBarcode').value.trim();
+      const name = document.getElementById('cpName').value.trim();
+      const fia = document.getElementById('cpFia').value.trim() || 'مورد عام';
+      const price = parseFloat(document.getElementById('cpPrice').value) || 0;
+
+      if (!name) return alert('يرجى إدخال اسم الصنف');
+
+      const newProd = {
+        uid: 'cp_' + Date.now(),
+        item_number: itemNum || String(Date.now()).slice(-5),
+        barcode: barcode || itemNum || String(Date.now()).slice(-8),
+        name: name,
+        fia: fia,
+        price: Number(price.toFixed(2)),
+        batches: []
+      };
+
+      customCloudProducts.unshift(newProd);
+      localStorage.setItem('ocare_custom_products', JSON.stringify(customCloudProducts));
+      pushDataToFirebase('customProducts', customCloudProducts);
+
+      rebuildAllProductsList();
+      renderInventory();
+      document.getElementById('addCustomProductModal').style.display = 'none';
+      showToast('✅ تم حفظ الصنف ومزامنته مع جميع الجوالات فوراً!');
+    }
+
     // مزامنة إعدادات وحسابات الموظفين عبر الرابط الذكي فور فتحه على جوال أي موظف
     function checkUrlSyncConfig() {
       try {
@@ -518,6 +741,7 @@
           if (decoded && decoded.employees) {
             appConfig = decoded;
             localStorage.setItem('ocare_app_config', JSON.stringify(appConfig));
+            pushDataToFirebase('appConfig', appConfig);
             window.history.replaceState({}, document.title, window.location.pathname);
             setTimeout(() => showToast('✅ تمت مزامنة حسابات الزملاء على هذا الجوال بنجاح!'), 500);
           }
@@ -527,10 +751,9 @@
 
     function copyEmployeeSyncLink() {
       try {
-        const encoded = btoa(unescape(encodeURIComponent(JSON.stringify(appConfig))));
-        const syncUrl = window.location.origin + window.location.pathname + '?sync=' + encoded;
+        const syncUrl = window.location.origin + window.location.pathname;
         navigator.clipboard.writeText(syncUrl).then(() => {
-          alert('تم نسخ رابط المزامنة بنجاح! أرسله الآن لزملائك في الواتساب؛ بمجرد فتحهم للرابط ستتحدث قائمة الحسابات وأسمائهم في جوالاتهم تلقائياً.');
+          alert('تم نسخ رابط المنظومة بنجاح! جميع الحسابات والبيانات متزامنة سحابياً عبر Firebase وتعمل فوراً لدى الجميع.');
         }).catch(() => {
           prompt('انسخ هذا الرابط وأرسله للزملاء:', syncUrl);
         });
@@ -571,8 +794,8 @@
               }
             });
             if (items.length > 0) {
-              allProducts = items;
-              populateFiaDatalist();
+              baseExcelProducts = items;
+              rebuildAllProductsList(savedBatches);
               renderInventory();
               showToast(`تم التحميل التلقائي لـ ${allProducts.length.toLocaleString()} صنف!`);
               return;
@@ -588,7 +811,7 @@
           const csv = await res.text();
           const wb = XLSX.read(csv, { type: 'string' });
           const rows = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], { defval: '' });
-          allProducts = rows.filter(r => r['اسم الصنف'] || r['اسم الصنف ']).map((r, idx) => {
+          baseExcelProducts = rows.filter(r => r['اسم الصنف'] || r['اسم الصنف ']).map((r, idx) => {
             const itemNum = String(r['رقم الصنف'] || r['رقم الصنف '] || '').replace(/\.0$/, '').trim();
             const barcode = String(r['الباركود'] || r['الباركود '] || '').replace(/\.0$/, '').trim();
             const name = String(r['اسم الصنف'] || r['اسم الصنف '] || '').trim();
@@ -605,7 +828,7 @@
               batches: savedBatches[key] || []
             };
           });
-          populateFiaDatalist();
+          rebuildAllProductsList(savedBatches);
           renderInventory();
         }
       } catch (e) {}
@@ -655,21 +878,31 @@
       });
     }
 
-    // تسجيل الدخول المرن (يدعم المطور 2020 + حسابات الموظفين من أي جوال 1235)
+    // تسجيل الدخول المرن (يدعم المطور 2020 + حسابات الموظفين المتزامنة مع Firebase)
     function handleLogin(e) {
       e.preventDefault();
       const emailInput = document.getElementById('loginEmail').value.trim();
       const emailLow = emailInput.toLowerCase();
       const pass = document.getElementById('loginPass').value.trim();
-      const isAdminEmail = appConfig.adminEmails.some(a => a.toLowerCase() === emailLow);
+      const isAdminEmail = (appConfig.adminEmails || []).some(a => a.toLowerCase() === emailLow);
+
+      // فحص ما إذا كان الموظف مسجلاً في قائمة الموظفين
+      const matchedEmp = (appConfig.employees || []).find(
+        u => u && ((u.email && u.email.toLowerCase() === emailLow) || (u.name && u.name.trim() === emailInput))
+      );
+
+      if (matchedEmp && matchedEmp.active === false) {
+        return alert('عذراً، هذا الحساب موقوف حالياً من قِبل المطور!');
+      }
 
       if (pass === appConfig.adminPin && (isAdminEmail || emailLow.includes('ershad') || emailLow.includes('admin') || emailInput.includes('إرشاد') || emailInput.includes('ارشاد'))) {
         currentUser = { email: emailLow, name: 'إرشاد (المطور)', role: 'admin' };
       } else if (pass === appConfig.adminPin && isAdminEmail) {
         currentUser = { email: emailLow, name: 'إرشاد (المطور)', role: 'admin' };
+      } else if (matchedEmp && matchedEmp.pin && String(matchedEmp.pin).trim() !== '' && pass === String(matchedEmp.pin).trim()) {
+        currentUser = { email: matchedEmp.email.toLowerCase(), name: matchedEmp.name, role: 'employee' };
       } else if (pass === appConfig.empPin) {
-        const emp = appConfig.employees.find(u => u.email.toLowerCase() === emailLow && u.active !== false);
-        const displayName = emp ? emp.name : (emailInput.includes('@') ? emailInput.split('@')[0] : emailInput);
+        const displayName = matchedEmp ? matchedEmp.name : (emailInput.includes('@') ? emailInput.split('@')[0] : emailInput);
         currentUser = { email: emailLow, name: displayName, role: 'employee' };
       } else {
         return alert('كلمة المرور أو بيانات الدخول غير صحيحة!');
@@ -789,6 +1022,7 @@
         }
       });
       localStorage.setItem('ocare_saved_batches', JSON.stringify(map));
+      pushDataToFirebase('savedBatches', map);
     }
 
     function addExpiryBatchRow(exp = '', qty = '') {
@@ -833,7 +1067,8 @@
       p.batches = newBatches;
       saveBatchesToStorage();
       renderRegisteredExpiryList();
-      showToast('تم حفظ التواريخ بنجاح');
+      renderInventory();
+      showToast('تم حفظ التواريخ ومزامنتها فوراً ✅');
     }
 
     function renderRegisteredExpiryList() {
@@ -854,6 +1089,12 @@
       `).join('');
     }
 
+    function syncBarcodeOrders() {
+      localStorage.setItem('ocare_barcode_orders', JSON.stringify(barcodeOrders));
+      pushDataToFirebase('barcodeOrders', barcodeOrders);
+      renderBarcodeOrders();
+    }
+
     function addItemToBarcodeOrder(uid) {
       const p = allProducts.find(x => x.uid === uid);
       if (!p) return;
@@ -861,8 +1102,7 @@
       const existing = barcodeOrders.find(x => x.uid === uid && x.group === grp);
       if (existing) existing.qty += 1;
       else barcodeOrders.unshift({ uid: p.uid, item_number: p.item_number || 'بدون رقم', barcode: p.barcode || '-', name: p.name, price: p.price, qty: 1, group: grp, done: false });
-      localStorage.setItem('ocare_barcode_orders', JSON.stringify(barcodeOrders));
-      renderBarcodeOrders();
+      syncBarcodeOrders();
       showToast(`أضيف لأمر الباركود (${grp}) بالعدد 1`);
     }
 
@@ -897,14 +1137,19 @@
         if (item.done && currentUser && currentUser.role === 'admin') {
           barcodeOrders = barcodeOrders.filter(x => !(x.uid === uid && x.group === grp));
         }
-        localStorage.setItem('ocare_barcode_orders', JSON.stringify(barcodeOrders));
-        renderBarcodeOrders();
+        syncBarcodeOrders();
       }
     }
-    function changeBOQty(uid, grp, d) { const it = barcodeOrders.find(x => x.uid === uid && x.group === grp); if (it) { it.qty = Math.max(1, it.qty + d); localStorage.setItem('ocare_barcode_orders', JSON.stringify(barcodeOrders)); renderBarcodeOrders(); } }
-    function setBOQty(uid, grp, v) { const it = barcodeOrders.find(x => x.uid === uid && x.group === grp); if (it) { it.qty = Math.max(1, parseInt(v,10)||1); localStorage.setItem('ocare_barcode_orders', JSON.stringify(barcodeOrders)); renderBarcodeOrders(); } }
-    function deleteBOItem(uid, grp) { barcodeOrders = barcodeOrders.filter(x => !(x.uid === uid && x.group === grp)); localStorage.setItem('ocare_barcode_orders', JSON.stringify(barcodeOrders)); renderBarcodeOrders(); }
-    function clearPrintedBarcodeOrders() { barcodeOrders = barcodeOrders.filter(x => !x.done); localStorage.setItem('ocare_barcode_orders', JSON.stringify(barcodeOrders)); renderBarcodeOrders(); }
+    function changeBOQty(uid, grp, d) { const it = barcodeOrders.find(x => x.uid === uid && x.group === grp); if (it) { it.qty = Math.max(1, it.qty + d); syncBarcodeOrders(); } }
+    function setBOQty(uid, grp, v) { const it = barcodeOrders.find(x => x.uid === uid && x.group === grp); if (it) { it.qty = Math.max(1, parseInt(v,10)||1); syncBarcodeOrders(); } }
+    function deleteBOItem(uid, grp) { barcodeOrders = barcodeOrders.filter(x => !(x.uid === uid && x.group === grp)); syncBarcodeOrders(); }
+    function clearPrintedBarcodeOrders() { barcodeOrders = barcodeOrders.filter(x => !x.done); syncBarcodeOrders(); }
+
+    function syncShortages() {
+      localStorage.setItem('ocare_shortages_list', JSON.stringify(shortagesList));
+      pushDataToFirebase('shortagesList', shortagesList);
+      renderShortages();
+    }
 
     function addItemToShortages(uid) {
       const p = allProducts.find(x => x.uid === uid);
@@ -913,8 +1158,7 @@
       const ex = shortagesList.find(x => x.uid === uid && x.branch === br);
       if (ex) ex.qty += 1;
       else shortagesList.unshift({ uid: p.uid, item_number: p.item_number, barcode: p.barcode, name: p.name, fia: p.fia, branch: br, qty: 1, date: new Date().toLocaleDateString('ar-SA') });
-      localStorage.setItem('ocare_shortages_list', JSON.stringify(shortagesList));
-      renderShortages();
+      syncShortages();
       showToast(`أضيف إلى ${br} (العدد: 1)`);
     }
 
@@ -939,9 +1183,9 @@
         </div>
       `).join('');
     }
-    function changeShortQty(uid, br, d) { const it = shortagesList.find(x => x.uid === uid && x.branch === br); if (it) { it.qty = Math.max(1, it.qty + d); localStorage.setItem('ocare_shortages_list', JSON.stringify(shortagesList)); renderShortages(); } }
-    function setShortQty(uid, br, v) { const it = shortagesList.find(x => x.uid === uid && x.branch === br); if (it) { it.qty = Math.max(1, parseInt(v,10)||1); localStorage.setItem('ocare_shortages_list', JSON.stringify(shortagesList)); renderShortages(); } }
-    function deleteShortItem(uid, br) { shortagesList = shortagesList.filter(x => !(x.uid === uid && x.branch === br)); localStorage.setItem('ocare_shortages_list', JSON.stringify(shortagesList)); renderShortages(); }
+    function changeShortQty(uid, br, d) { const it = shortagesList.find(x => x.uid === uid && x.branch === br); if (it) { it.qty = Math.max(1, it.qty + d); syncShortages(); } }
+    function setShortQty(uid, br, v) { const it = shortagesList.find(x => x.uid === uid && x.branch === br); if (it) { it.qty = Math.max(1, parseInt(v,10)||1); syncShortages(); } }
+    function deleteShortItem(uid, br) { shortagesList = shortagesList.filter(x => !(x.uid === uid && x.branch === br)); syncShortages(); }
 
     function previewNoteImage(e) {
       const f = e.target.files[0];
@@ -957,11 +1201,13 @@
       if (!txt && !tempNoteImageBase64) return alert('اكتب ملاحظة أو أرفق صورة');
       shiftNotes.unshift({ id: 'n_' + Date.now(), text: txt, target, img: tempNoteImageBase64, by: currentUser ? currentUser.name : 'موظف', time: new Date().toLocaleString('ar-SA'), read: false });
       localStorage.setItem('ocare_shift_notes', JSON.stringify(shiftNotes));
+      pushDataToFirebase('shiftNotes', shiftNotes);
       document.getElementById('noteTextInp').value = '';
       document.getElementById('noteImgPreview').style.display = 'none';
       tempNoteImageBase64 = '';
       renderShiftNotes();
       updateNotifBadge();
+      showToast('تم إرسال الملاحظة ومزامنتها فوراً ✅');
     }
 
     function renderShiftNotes() {
@@ -976,11 +1222,30 @@
           </div>
           <p style="font-size:0.84rem; margin-bottom:6px;">${n.text}</p>
           ${n.img ? `<img src="${n.img}" style="max-width:100%; border-radius:10px; margin-bottom:6px;">` : ''}
-          ${!n.read ? `<button class="mini-act-btn" onclick="markNoteRead('${n.id}')">✅ تم الاطلاع</button>` : ''}
+          <div style="display:flex; gap:6px;">
+            ${!n.read ? `<button class="mini-act-btn" onclick="markNoteRead('${n.id}')">✅ تم الاطلاع</button>` : ''}
+            ${isAdm ? `<button class="mini-act-btn" style="background:#FEE2E2;color:#991B1B;" onclick="deleteShiftNote('${n.id}')">🗑️ حذف</button>` : ''}
+          </div>
         </div>
       `).join('');
     }
-    function markNoteRead(id) { const n = shiftNotes.find(x => x.id === id); if (n) { n.read = true; localStorage.setItem('ocare_shift_notes', JSON.stringify(shiftNotes)); renderShiftNotes(); updateNotifBadge(); } }
+    function markNoteRead(id) {
+      const n = shiftNotes.find(x => x.id === id);
+      if (n) {
+        n.read = true;
+        localStorage.setItem('ocare_shift_notes', JSON.stringify(shiftNotes));
+        pushDataToFirebase('shiftNotes', shiftNotes);
+        renderShiftNotes();
+        updateNotifBadge();
+      }
+    }
+    function deleteShiftNote(id) {
+      shiftNotes = shiftNotes.filter(x => x.id !== id);
+      localStorage.setItem('ocare_shift_notes', JSON.stringify(shiftNotes));
+      pushDataToFirebase('shiftNotes', shiftNotes);
+      renderShiftNotes();
+      updateNotifBadge();
+    }
     function updateNotifBadge() { const u = shiftNotes.filter(n => !n.read).length; const b = document.getElementById('notifBadge'); b.style.display = u > 0 ? 'flex' : 'none'; b.innerText = u; }
 
     function renderBrandsGrid() {
@@ -1131,36 +1396,65 @@
     }
 
     function renderSettingsUI() {
-      document.getElementById('setAdminEmail').value = appConfig.adminEmails[0] || '';
+      document.getElementById('setAdminEmail').value = (appConfig.adminEmails && appConfig.adminEmails[0]) || '';
       document.getElementById('setAdminPin').value = appConfig.adminPin;
       document.getElementById('setEmpPin').value = appConfig.empPin;
-      document.getElementById('authorizedEmployeesList').innerHTML = appConfig.employees.map((u, i) => `
-        <div class="prod-card" style="margin-bottom:6px; padding:8px 12px;">
-          <div><strong style="font-size:0.82rem;">${u.name}</strong><div style="font-size:0.72rem; color:var(--muted);">${u.email}</div></div>
-          <button class="mini-act-btn" style="background:#FEE2E2; color:#991B1B;" onclick="appConfig.employees.splice(${i},1);localStorage.setItem('ocare_app_config',JSON.stringify(appConfig));renderSettingsUI();">حذف</button>
+      document.getElementById('authorizedEmployeesList').innerHTML = (appConfig.employees || []).map((u, i) => `
+        <div class="prod-card" style="margin-bottom:6px; padding:8px 12px; opacity:${u.active === false ? '0.55' : '1'};">
+          <div>
+            <strong style="font-size:0.82rem;">${u.name} ${u.active === false ? '<span style="color:red;">(موقوف)</span>' : '<span style="color:green;">(نشط)</span>'}</strong>
+            <div style="font-size:0.72rem; color:var(--muted);">${u.email} ${u.pin ? `| رمز خاص: ${u.pin}` : ''}</div>
+          </div>
+          <div style="display:flex; gap:5px;">
+            <button class="mini-act-btn" style="background:${u.active === false ? '#DCFCE7' : '#FEF3C7'}; color:${u.active === false ? '#166534' : '#92400E'};" onclick="toggleEmployeeActive(${i})">${u.active === false ? 'تفعيل' : 'إيقاف'}</button>
+            <button class="mini-act-btn" style="background:#FEE2E2; color:#991B1B;" onclick="removeEmployee(${i})">حذف</button>
+          </div>
         </div>
       `).join('');
+    }
+
+    function toggleEmployeeActive(idx) {
+      if (!appConfig.employees[idx]) return;
+      appConfig.employees[idx].active = appConfig.employees[idx].active === false ? true : false;
+      localStorage.setItem('ocare_app_config', JSON.stringify(appConfig));
+      pushDataToFirebase('appConfig', appConfig);
+      renderSettingsUI();
+      showToast('تم تحديث حالة الموظف ومزامنتها فوراً');
+    }
+
+    function removeEmployee(idx) {
+      appConfig.employees.splice(idx, 1);
+      localStorage.setItem('ocare_app_config', JSON.stringify(appConfig));
+      pushDataToFirebase('appConfig', appConfig);
+      renderSettingsUI();
+      showToast('تم حذف الحساب ومزامنته مع السحابة');
     }
 
     function addAuthorizedEmployee() {
       const em = document.getElementById('newEmpEmail').value.trim().toLowerCase();
       const nm = document.getElementById('newEmpName').value.trim();
-      if (!em || !nm) return;
-      appConfig.employees.push({ email: em, name: nm, active: true });
+      const customPin = document.getElementById('newEmpCustomPin').value.trim();
+      if (!em || !nm) return alert('أدخل إيميل/معرف الزميل والاسم');
+      if (!appConfig.employees) appConfig.employees = [];
+      appConfig.employees.push({ email: em, name: nm, pin: customPin, active: true });
       localStorage.setItem('ocare_app_config', JSON.stringify(appConfig));
+      pushDataToFirebase('appConfig', appConfig);
       document.getElementById('newEmpEmail').value = '';
       document.getElementById('newEmpName').value = '';
+      document.getElementById('newEmpCustomPin').value = '';
       renderSettingsUI();
-      showToast('تمت الإضافة! اضغط زر نسخ رابط المزامنة بالأسفل لإرساله للزملاء');
+      showToast('✅ تمت إضافة الموظف ومزامنته سحابياً فوراً!');
     }
 
     function saveSecuritySettings() {
       const admEm = document.getElementById('setAdminEmail').value.trim().toLowerCase();
+      if (!appConfig.adminEmails) appConfig.adminEmails = [];
       if (admEm && !appConfig.adminEmails.includes(admEm)) appConfig.adminEmails.unshift(admEm);
       appConfig.adminPin = document.getElementById('setAdminPin').value.trim() || '2020';
       appConfig.empPin = document.getElementById('setEmpPin').value.trim() || '1235';
       localStorage.setItem('ocare_app_config', JSON.stringify(appConfig));
-      showToast('تم حفظ الإعدادات');
+      pushDataToFirebase('appConfig', appConfig);
+      showToast('✅ تم حفظ ومزامنة إعدادات الدخول فوراً');
     }
 
     window.addEventListener('DOMContentLoaded', () => {
@@ -1172,7 +1466,9 @@
         document.getElementById('loginOverlay').style.display = 'none';
         applyPermissionsUI();
       }
-      autoLoadInventoryFromServer();
+      autoLoadInventoryFromServer().then(() => {
+        initRealtimeFirebaseSync();
+      });
     });
   </script>
 </body>
