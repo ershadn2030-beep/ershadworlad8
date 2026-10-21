@@ -133,7 +133,7 @@
         </div>
         <div class="form-group">
           <label>كلمة المرور / الرمز السري *</label>
-          <input type="password" id="loginPass" placeholder="أدخل رمز الدخول (2020 أو 1235)" onkeydown="if(event.key==='Enter') handleLogin(event)">
+          <input type="password" id="loginPass" placeholder="أدخل رمز الدخول" onkeydown="if(event.key==='Enter') handleLogin(event)">
         </div>
         <button type="button" class="btn-main" onclick="handleLogin(event)">تسجيل الدخول</button>
       </form>
@@ -419,11 +419,11 @@
         </div>
         <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
           <div class="form-group">
-            <label>الرمز السري للمطور (2020):</label>
+            <label>الرمز السري للمطور:</label>
             <input type="text" id="setAdminPin">
           </div>
           <div class="form-group">
-            <label>رمز دخول الموظفين العام (1235):</label>
+            <label>رمز دخول الموظفين العام:</label>
             <input type="text" id="setEmpPin">
           </div>
         </div>
@@ -502,7 +502,6 @@
   <div class="toast" id="toastBox"></div>
 
   <script>
-    // دالة قراءة آمنة من الذاكرة المحلية تمنع توقف النظام
     function safeGetStorage(key, fallback) {
       try {
         const raw = localStorage.getItem(key);
@@ -577,7 +576,6 @@
       return out;
     }
 
-    // إرسال التحديثات للسحابة مع وضع علامة _EMPTY_ عند حذف آخر صنف لضمان حذفه عند الجميع
     function pushDataToFirebase(sectionKey, dataValue) {
       if (!cloudRef || isApplyingRemoteUpdate) return;
       let payload = dataValue;
@@ -678,7 +676,6 @@
       populateFiaDatalist();
     }
 
-    // دالة تسجيل الدخول المحمية ضد أي خطأ
     function handleLogin(e) {
       if (e && e.preventDefault) e.preventDefault();
       try {
@@ -714,7 +711,7 @@
           const displayName = matchedEmp ? matchedEmp.name : (emailInput ? (emailInput.includes('@') ? emailInput.split('@')[0] : emailInput) : 'موظف');
           currentUser = { email: emailLow || 'emp@ocare.com', name: displayName, role: 'employee' };
         } else {
-          alert('كلمة المرور غير صحيحة! (المطور: 2020 | الموظف: 1235)');
+          alert('كلمة المرور أو بيانات الدخول غير صحيحة!');
           return;
         }
 
@@ -723,8 +720,7 @@
         applyPermissionsUI();
         showToast('مرحباً بك، ' + currentUser.name + ' 👋');
       } catch (err) {
-        currentUser = { email: 'admin@ocare.com', name: 'إرشاد (المطور)', role: 'admin' };
-        document.getElementById('loginOverlay').style.display = 'none';
+        alert('حدث خطأ في قراءة البيانات، يرجى المحاولة مرة أخرى.');
       }
     }
 
