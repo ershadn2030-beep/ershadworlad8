@@ -605,10 +605,9 @@
     }
 
     // دالة رفع التحديثات إلى Firebase فوراً
-   function pushDataToFirebase(sectionKey, dataValue) {
+ function pushDataToFirebase(sectionKey, dataValue) {
   if (!cloudRef || isApplyingRemoteUpdate) return;
-  const valToSend = (Array.isArray(dataValue) && dataValue.length === 0) ? null : dataValue;
-  cloudRef.child(sectionKey).set(valToSend).then(() => {
+  cloudRef.child(sectionKey).set(dataValue).then(() => {
         updateSyncBadgeUI('online');
       }).catch((err) => {
         if (err && (err.code === 'PERMISSION_DENIED' || String(err.message).includes('permission_denied'))) {
@@ -692,19 +691,10 @@
         rebuildAllProductsList(cloudBatches);
 
         // 4. مزامنة أوامر طباعة الباركود (مع دمج أي بيانات محلية لم تُرفع بعد)
-      barcodeOrders = data && data.barcodeOrders 
-  ? (Array.isArray(data.barcodeOrders) ? data.barcodeOrders : Object.values(data.barcodeOrders)) 
-  : [];
-localStorage.setItem('ocare_barcode_orders', JSON.stringify(barcodeOrders));
-
-shortagesList = data && data.shortagesList 
-  ? (Array.isArray(data.shortagesList) ? data.shortagesList : Object.values(data.shortagesList)) 
-  : [];
-localStorage.setItem('ocare_shortages_list', JSON.stringify(shortagesList));
-
-shiftNotes = data && data.shiftNotes 
-  ? (Array.isArray(data.shiftNotes) ? data.shiftNotes : Object.values(data.shiftNotes)) 
-  : [];
+if (data.barcodeOrders) {
+  barcodeOrders = Array.isArray(data.barcodeOrders) ? data.barcodeOrders : Object.values(data.barcodeOrders);
+  localStorage.setItem('ocare_barcode_orders', JSON.stringify(barcodeOrders));
+}
 localStorage.setItem('ocare_shift_notes', JSON.stringify(shiftNotes));
         } else if (barcodeOrders.length > 0) {
           cloudRef.child('barcodeOrders').set(barcodeOrders);
